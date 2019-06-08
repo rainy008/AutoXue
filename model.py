@@ -7,7 +7,6 @@
 @time: 2019年06月02日 15:57:45
 @desc: Life is short, you need Python
 '''
-
 from sqlalchemy import Column,Integer, String, Text, create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
@@ -145,6 +144,43 @@ def db_to_xls(session, filename):
     wb.save(filename)
     print('题库已导出到%s'%filename)
 
+def db_to_mtb(session, filename):
+    '''导出到磨题帮题库模板'''
+    import xlwt
+    data = session.query(Bank).all()
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet('题库')
+    if not data:
+        raise 'database is empty'
+    ws.write(0, 0, label='标题')
+    ws.write_merge(0,0,1,7,"学习强国一战到底")
+    ws.write(1, 0, label='描述')
+    ws.write_merge(1,1,1,7,"一份学习强国挑战答题试卷，全为单选题")
+    ws.write(2, 0, label='用时')
+    ws.write(2, 1, 100)
+    ws.write(3, 0, label='题干')
+    ws.write(3, 1, label='题型')
+    ws.write(3, 2, label='选择项1')
+    ws.write(3, 3, label='选择项2')
+    ws.write(3, 4, label='选择项3')
+    ws.write(3, 5, label='选择项4')
+    ws.write(3, 6, label='解析')
+    ws.write(3, 7, label='答案')
+    ws.write(3, 8, label='得分')
+    for d in data:
+        row = d.id + 3
+        ws.write(row, 0, label=d.content)
+        ws.write(row, 1, label='顺序选择题')
+        ws.write(row, 2, label=d.item1)
+        ws.write(row, 3, label=d.item2)
+        ws.write(row, 4, label=d.item3)
+        ws.write(row, 5, label=d.item4)
+        ws.write(row, 6, label='')
+        ws.write(row, 7, label=d.answer)
+        ws.write(row, 8, 1)
+    wb.save(filename)
+    print('题库(磨题帮)已导出到%s'%filename)
+
 
 def db_from_xls(session, filename):
     import xlrd
@@ -174,6 +210,8 @@ def db_to_md(session, filename):
     print('题库已导出到%s'%filename)
     
     
+def main(argv):
+    pass
 
 
 
@@ -209,6 +247,7 @@ if __name__ == "__main__":
             # if 'N' != ok: db_update(session, int(idx), new_ans.upper())
         elif 'X' == ch:
             db_to_xls(session, './data/data-dev.xls')
+            db_to_mtb(session, './data/data-mtb.xls')
         elif 'M' == ch:
             db_to_md(session, './data/data-dev.md')
         else:
