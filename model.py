@@ -29,25 +29,35 @@ class Bank(Base):
     item2 = Column(String(128))
     item3 = Column(String(128))
     item4 = Column(String(128))
-    answer = Column(String(128))
+    answer = Column(String(8))
+    bounds = Column(String(64))
 
-    def __init__(self, content, options, answer=''):
+    def __init__(self, content, options, answer='', bounds=''):
         for i in range(len(options), 4):
             options.append('')
         # print(options)
-        self.content = re.sub(r'\s+', '', content)
-        self.item1, self.item2, self.item3, self.item4 = [re.sub(r'\s+', '', x) for x in options]
-        self.answer = re.sub(r'\s+', '', answer)
+        self.content = content
+        self.item1, self.item2, self.item3, self.item4 = [str(x) for x in options]
+        self.answer = answer
+        self.bounds = bounds
 
     @classmethod
     def from_xml(cls, filename):
         xml = etree.parse(filename)
         root = xml.getroot()
         xml_question = root.xpath(Config.XPATH_QUESTION)[0]
-        content = xml_question.xpath(Config.XPATH_CONTENT)[0].strip()
+        content = xml_question.xpath(Config.XPATH_CONTENT)[0]
         xml_options = xml_question.xpath(Config.XPATH_OPTIONS)
-        options = [str(x.xpath(Config.XPATH_OPTOIN_DESC)[0]).strip() for x in xml_options]
-        return cls(content, options)
+        options = [x.xpath(Config.XPATH_OPTOIN_DESC)[0] for x in xml_options]
+        bounds = []
+        for x in xml_options:
+            ''' 此处保存的bounds针对华为P20 分辨率2244*1080'''
+            x0, y0, x1, y1 = [int(x) for x in re.findall(r'\d+', x.xpath(Config.XPATH_OPTION_BOUNDES)[0])]
+            pos = complex((x0+x1)/2, (y0+y1)/2)
+            bounds.append(pos)
+        bounds = " ".join([str(x) for x in bounds])
+        # print(bounds)
+        return cls(content=content, options=options, bounds=bounds)
 
     def __eq__(self, other):
         # if self.content != other.content:
@@ -66,8 +76,12 @@ class Bank(Base):
     def __repr__(self):
         return f'{self.content}\n'
     
-    def __str__(self):
+    def __str__(self): 
+        # 统一题目内容的留空为两个英文下划线
+        # 江南自古富庶地，风流才子美名扬，江南四大才子是__、__、__、__。 
+        # 油锅起火时使用以下方法中__方法扑灭是不正确的。
         content = re.sub(r'[\(（]出题单位.*', "", self.content)
+        content = re.sub(r'(\s{2,})|(（\s*）)|(【\s*】)', '____', content)
         items = [x for x in (self.item1, self.item2, self.item3, self.item4) if x]
         index = ord(self.answer)-65
         if index < len(items):
@@ -135,7 +149,7 @@ def db_to_xls(session, filename):
     ws.write(0, 6, '答案')
     for d in data:
         ws.write(d.id, 0, label=d.id)
-        ws.write(d.id, 1, label=d.content)
+        ws.write(d.id, 1, label=re.sub(r'\s+', '', d.content))
         ws.write(d.id, 2, label=d.item1)
         ws.write(d.id, 3, label=d.item2)
         ws.write(d.id, 4, label=d.item3)
@@ -194,7 +208,7 @@ def db_from_xls(session, filename):
                     options=ws.row_values(i, start_colx=2, end_colx=6), 
                     answer=ws.cell_value(i, 6))
         db_add(session, bank)
-    print('更新数据库成功！来源：%s'%filename)
+    print('更新数据库成功！来源：%s %d'%(filename, len(data)))
 
 
 
@@ -210,25 +224,10 @@ def db_to_md(session, filename):
     print('题库已导出到%s'%filename)
     
     
-def main(argv):
-    pass
-
-
-
-if __name__ == "__main__":
+def main():
     # 创建数据表
     Base.metadata.create_all(engine)
     session = Session()
-
-    # 执行操作
-    # bank = Bank(content='近期，我国学者研究“多节点网络”取得基础性突破。（出题单位：科技部引智司）',
-    #             options=['电子', '原子', '质子', '量子'], answer='D')
-    # db_add(session, bank)
-    # db_print(session)
-
-    # xls 导入
-    # filename = "C:/Users/vince/repositories/quizXue/data/data-dev-old.xls"
-    # db_from_xls(session, filename)
 
     while True:
         print('%s\n%s\n%s'%('-*-'*28, '\tp-打印题库\tu-更新记录\tx-导出xls\tm-导出md\te-退出', '-*-'*28))
@@ -253,11 +252,21 @@ if __name__ == "__main__":
         else:
             print('输入错误，请重新输入！')
 
-# 近期，我国学者研究“多节点网络”取得基础性突破。（出题单位：科技部引智司）
-# --------------------------------------------------------------------------
-# A. 电子: 2
-# B. 原子: 2
-# C. 质子: 0
-# D. 量子: 29
-# --------------------------------------------------------------------------
-# 请先在手机提交答案，根据提交结果输入答案！
+
+if __name__ == "__main__":
+    
+
+    main()
+
+    # 执行操作
+    # bank = Bank(content='近期，我国学者研究“多节点网络”取得基础性突破。（出题单位：科技部引智司）',
+    #             options=['电子', '原子', '质子', '量子'], answer='D')
+    # db_add(session, bank)
+    # db_print(session)
+
+    # xls 导入
+    # filename = "C:/Users/vince/repositories/quizXue/data/data-dev-old.xls"
+    # db_from_xls(session, filename)
+    
+    # bank = Bank.from_xml('./ui.xml')
+
