@@ -81,13 +81,13 @@ class Bank(Base):
         # 江南自古富庶地，风流才子美名扬，江南四大才子是__、__、__、__。 
         # 油锅起火时使用以下方法中__方法扑灭是不正确的。
         content = re.sub(r'[\(（]出题单位.*', "", self.content)
-        content = re.sub(r'[(\(【（]?\s\s*[\)）】)|(\(\))]', '__', content)
+        content = re.sub(r'(\s{2,})|(（\s*）)|(【\s*】)', '____', content)
         items = [x for x in (self.item1, self.item2, self.item3, self.item4) if x]
         index = ord(self.answer)-65
         if index < len(items):
             items[index] = f'**{items[index]}**'
         options = '\n'.join([f'+ {x}' for x in items])
-        return f'{self.id}. {content} **{self.answer.upper()}**\n{self.bounds}\n{options}\n'
+        return f'{self.id}. {content} **{self.answer.upper()}**\n{options}\n'
     
 
 # 初始化数据库连接:

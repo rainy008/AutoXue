@@ -78,6 +78,8 @@ def run(session):
             if 0j == pos:
                 t= threading.Thread(target=attention, args=('crossed.mp3',1))#创建线程
                 t.start()
+                sleep(5)
+                continue
             else:
                 print(f"\nfrom db 自动提交正确答案:  {bank.answer}\n")
                 sleep(delay)
@@ -93,6 +95,8 @@ def run(session):
             if 0j == pos:
                 t= threading.Thread(target=attention, args=('crossed.mp3',1))#创建线程
                 t.start()
+                sleep(5)
+                continue
             else:        
                 print(f"\nfrom xls 自动提交正确答案:  {bank2.answer}\n")
                 sleep(delay)
