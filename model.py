@@ -203,15 +203,12 @@ def db_from_xls(session, filename):
     nrows = ws.nrows  #获取该sheet中的有效行数
     if nrows < 2:
         raise 'Excel has no records'
-    data = []
     for i in range(1, nrows):
         bank = Bank(content=ws.cell_value(i, 1), 
                     options=ws.row_values(i, start_colx=2, end_colx=6), 
                     answer=ws.cell_value(i, 6))
-        # db_add(session, bank)
-        data.append(bank)
+        db_add(session, bank)
     print('更新数据库成功！来源：%s %d'%(filename, len(data)))
-    return data
 
 
 
