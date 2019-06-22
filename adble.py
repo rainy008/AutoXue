@@ -27,6 +27,6 @@ def connect_mumu():
     os.system('adb connect 127.0.0.1:7555')
 
 if __name__ == "__main__":
-    out = subprocess.Popen('adb shell uiautomator dump /sdcard/ui.xml', shell=True, stdout=subprocess.PIPE)
-    out = subprocess.Popen('adb pull /sdcard/ui.xml', shell=True, stdout=None)
+    subprocess.check_call('adb shell uiautomator dump /sdcard/ui.xml', shell=True, stdout=subprocess.PIPE)
+    print(subprocess.check_call('adb pull /sdcard/ui.xml ui-test.xml', shell=True, stdout=subprocess.PIPE))
 

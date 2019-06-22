@@ -42,11 +42,15 @@ def search(question):
     print('%s\n请先在手机提交答案，根据提交结果输入答案！'%('-'*min(len(question.content)*2, 120)))
     
 
-def run(session):
+def run(session, num=0):
+    if 0 == num:
+        num = randint(11, 20)
+
     # t= threading.Thread(target=attention)#创建线程
     # t.setDaemon(True)#设置为后台线程，这里默认是False，设置为True之后则主线程不用等待子线程
-    while True:
+    for i in range(num):
         pull_xml(filename)
+        sleep(2)
         question = Bank.from_xml(filename)
         print('\n%s\n%s'%('-'*min(len(question.content)*2, 120), question.content))
         bank = db_qeury(session, content=question.content)
@@ -58,13 +62,13 @@ def run(session):
             if question.item2: print('B. %s'%question.item2)
             if question.item3: print('C. %s'%question.item3)
             if question.item4: print('D. %s'%question.item4)
+            print(f"\n{delay} 秒内自动提交正确答案:  {bank.answer}\n")
             if 0j == pos:
                 t= threading.Thread(target=attention, args=('crossed.mp3',1))#创建线程
                 t.start()
                 sleep(5)
                 continue
             else:
-                print(f"\n{delay} 秒内自动提交正确答案:  {bank.answer}\n")
                 sleep(delay)
                 tap_screen(int(pos.real), int(pos.imag))
         else:
