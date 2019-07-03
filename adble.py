@@ -26,7 +26,9 @@ def pull_xml(filename):
 
 def tap_screen(x, y):
     # print('tap (%d, %d)'%(x, y))
-    os.system('adb shell input tap %d %d'%(x, y))
+    # os.system('adb shell input tap %d %d'%(x, y))
+
+    os.system('adb shell input swipe %d %d %d %d 50'%(x, y, x, y))
 
 def connect_mumu():
     os.system('adb connect 127.0.0.1:7555')

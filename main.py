@@ -42,10 +42,11 @@ def search(question):
     print('%s\n请先在手机提交答案，根据提交结果输入答案！'%('-'*min(len(question.content)*2, 120)))
     
 
-def run(session, num=35):
+def run(session, num=float('inf')):
     # t= threading.Thread(target=attention)#创建线程
     # t.setDaemon(True)#设置为后台线程，这里默认是False，设置为True之后则主线程不用等待子线程
-    for i in range(num):
+    while num:
+        num = num - 1
         pull_xml(filename)
         sleep(1)
         question = Bank.from_xml(filename)
@@ -59,7 +60,7 @@ def run(session, num=35):
             if question.item2: print('B. %s'%question.item2)
             if question.item3: print('C. %s'%question.item3)
             if question.item4: print('D. %s'%question.item4)
-            print(f"\n{delay} 秒内自动提交正确答案:  {bank.answer}\n")
+            print(f"\n{delay} 秒内自动提交答案:  {bank.answer}\n")
             if 0j == pos:
                 t= threading.Thread(target=attention, args=('crossed.mp3',1))#创建线程
                 t.start()
@@ -79,5 +80,7 @@ def run(session, num=35):
                 question.answer = ch
                 db_add(session, question)
 
+        
+
 if __name__ == "__main__":
-    run(session, 30)
+    run(session)
