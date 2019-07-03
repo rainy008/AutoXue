@@ -14,10 +14,15 @@ from config import Config
 from time import sleep
 
 def pull_xml(filename):
-    if os.path.exists(filename):
-        os.remove(filename)
-    os.system('adb shell uiautomator dump /sdcard/ui.xml')
-    os.system('adb pull /sdcard/ui.xml %s'%filename)
+    while True:
+        if os.path.exists(filename):
+            os.remove(filename)
+        os.system('adb shell uiautomator dump /sdcard/ui.xml')
+        sleep(1)
+        os.system('adb pull /sdcard/ui.xml %s'%filename)
+        if os.path.getsize(filename):
+            break
+
 
 def tap_screen(x, y):
     # print('tap (%d, %d)'%(x, y))

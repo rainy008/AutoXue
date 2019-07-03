@@ -42,19 +42,16 @@ def search(question):
     print('%s\n请先在手机提交答案，根据提交结果输入答案！'%('-'*min(len(question.content)*2, 120)))
     
 
-def run(session, num=0):
-    if 0 == num:
-        num = randint(11, 20)
-
+def run(session, num=35):
     # t= threading.Thread(target=attention)#创建线程
     # t.setDaemon(True)#设置为后台线程，这里默认是False，设置为True之后则主线程不用等待子线程
     for i in range(num):
         pull_xml(filename)
-        sleep(2)
+        sleep(1)
         question = Bank.from_xml(filename)
         print('\n%s\n%s'%('-'*min(len(question.content)*2, 120), question.content))
         bank = db_qeury(session, content=question.content)
-        delay = randint(3,5)
+        delay = 1 # randint(3,5)
         if bank:
             index = ord(bank.answer)-65
             pos = complex(question.bounds.split(' ')[index])
@@ -83,5 +80,4 @@ def run(session, num=0):
                 db_add(session, question)
 
 if __name__ == "__main__":
-    run(session)
-
+    run(session, 30)

@@ -228,7 +228,7 @@ def main():
     # 创建数据表
     Base.metadata.create_all(engine)
     session = Session()
-
+    # db_update(session, 823, 'B')
     while True:
         print('%s\n%s\n%s'%('-*-'*28, '\tp-打印题库\tu-更新记录\tx-导出xls\tm-导出md\te-退出', '-*-'*28))
         ch = input('''请输入：''').upper()
