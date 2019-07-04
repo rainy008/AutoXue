@@ -60,7 +60,7 @@ def run(session, num=float('inf')):
             if question.item2: print('B. %s'%question.item2)
             if question.item3: print('C. %s'%question.item3)
             if question.item4: print('D. %s'%question.item4)
-            print(f"\n{delay} 秒内自动提交答案:  {bank.answer}\n")
+            print(f"\n {delay} 秒自动提交答案:  {bank.answer}\n")
             if 0j == pos:
                 t= threading.Thread(target=attention, args=('crossed.mp3',1))#创建线程
                 t.start()
