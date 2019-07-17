@@ -45,6 +45,7 @@ class Bank(Base):
     def from_xml(cls, filename):
         xml = etree.parse(filename)
         root = xml.getroot()
+        print(root)
         xml_question = root.xpath(Config.XPATH_QUESTION)[0]
         content = xml_question.xpath(Config.XPATH_CONTENT)[0]
         xml_options = xml_question.xpath(Config.XPATH_OPTIONS)
@@ -252,11 +253,16 @@ def main():
         else:
             print('输入错误，请重新输入！')
 
+def test():
+    bank = Bank.from_xml('./ui.xml')
+    print(bank)
+
 
 if __name__ == "__main__":
     
 
     main()
+    # test()
 
     # 执行操作
     # bank = Bank(content='近期，我国学者研究“多节点网络”取得基础性突破。（出题单位：科技部引智司）',

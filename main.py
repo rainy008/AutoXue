@@ -83,4 +83,4 @@ def run(session, num=float('inf')):
         
 
 if __name__ == "__main__":
-    run(session, 35)
+    run(session,842)
