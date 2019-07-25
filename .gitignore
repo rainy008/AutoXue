@@ -102,5 +102,6 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+ui.xml
 ui*.xml
 data/data-dev.docx

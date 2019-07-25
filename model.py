@@ -45,7 +45,7 @@ class Bank(Base):
     def from_xml(cls, filename):
         xml = etree.parse(filename)
         root = xml.getroot()
-        print(root)
+        # print(root)
         xml_question = root.xpath(Config.XPATH_QUESTION)[0]
         content = xml_question.xpath(Config.XPATH_CONTENT)[0]
         xml_options = xml_question.xpath(Config.XPATH_OPTIONS)
