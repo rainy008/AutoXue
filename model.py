@@ -150,9 +150,9 @@ class Model():
 
 if __name__ == "__main__":
     db = Model()
-    # for d in db.query():
-    #     print(d)
-    db.to_markdown('./data/data-dev.md')
+    for d in db.query():
+        print(d)
+    # db.to_markdown('./data/data-dev.md')
     # bank = Bank.from_xml('terminal')
     # bank = Bank.from_xml()
     

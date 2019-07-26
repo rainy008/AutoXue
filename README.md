@@ -31,3 +31,4 @@ python -m venv venv
 (venv)$:python main.py --device mumu
 ```
 
+6. 由于终端设备差异导致UI布局不尽相同，对于未兼容的设备，欢迎大家为config.ini中增加xpath规则
