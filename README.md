@@ -1,7 +1,7 @@
 # quizXue
 ## 学习强国 挑战答题
 
-> 正如每日、每周、专项答题一样，目的是为了巩固知识，该脚本实现挑战答题辅助功能，可导出Excel题库或**磨题帮**题库。
+> 改进脚本，同时支持手机和MuMu模拟器，此外提供了xpath规则的扩展能力，可自行根据设备设计xpath规则
 
 采用adb模块获取手机UI布局的xml文件，通过lxml解析出题目内容和选项，答案提交并判断正确后将本题保存到数据库。
 
@@ -16,7 +16,7 @@
 1. 安装[ADB](https://adb.clockworkmod.com/),并配置环境变量
 > 参考[https://github.com/Skyexu/TopSup](https://github.com/Skyexu/TopSup)
 
-2. 手机连接电脑，开启USB调试模式
+2. 手机连接电脑，开启USB调试模式 或者 下载安装[MuMu模拟器](http://mumu.163.com/)
 
 3. python安装虚拟环境和模块
 ```python
@@ -24,17 +24,10 @@ python -m venv venv
 (venv)$:pip install -r requirements.txt
 ```
 
-4. 手机进入挑战答题
+4. 进入挑战答题
 
 5. 运行脚本
 ```python
-(venv)$:python main.py
+(venv)$:python main.py --device mumu
 ```
 
-6. 直接执行model.py可将数据库导出到[题库](./data/data-dev.md)，可直接使用Ctrl+F搜索答案，也可直接下载使用[Excel版本](./data)。
-
-```python
-(venv)$:python model.py
-```
-
-> 展望： 数据库中未检索到记录时需要手机上提交之后在控制台手动提交添加记录到数据库，希望通过*adb shell getevent*获取手机输入事件，直接驱动脚本完成数据库的添加和转入下一流程
