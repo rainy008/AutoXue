@@ -1,5 +1,5 @@
 # quizXue v1.1
-## 学习强国 挑战答题
+## 学习强国 挑战答题([题库](./data/data-dev.md))
 
 > 改进脚本，同时支持手机和MuMu模拟器，此外提供了xpath规则的扩展能力，可自行根据设备设计xpath规则
 
@@ -38,6 +38,6 @@ python -m venv venv
 (venv)$:python main.py --device huawei_p20
 ```
 
-6. 由于终端设备差异导致UI布局不尽相同，对于未兼容的设备，欢迎大家在config.ini中增加xpath规则
+6. 由于终端设备差异导致UI布局不尽相同，对于未兼容的设备，欢迎大家在[config.ini](./config.ini)中增加xpath规则或提交issues
 
 > TODO: 阅读文章、观看视频
