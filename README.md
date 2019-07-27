@@ -1,4 +1,4 @@
-# quizXue
+# quizXue v1.1
 ## 学习强国 挑战答题
 
 > 改进脚本，同时支持手机和MuMu模拟器，此外提供了xpath规则的扩展能力，可自行根据设备设计xpath规则
@@ -19,6 +19,7 @@
 2. 手机连接电脑，开启USB调试模式 或者 下载安装[MuMu模拟器](http://mumu.163.com/)
 
 3. python安装虚拟环境和模块
+> 脚本中使用了f-string特性，请安装python3.6及以上版本
 ```python
 python -m venv venv
 (venv)$:pip install -r requirements.txt
@@ -27,8 +28,16 @@ python -m venv venv
 4. 进入挑战答题
 
 5. 运行脚本
+> --device 参数指定xpath规则(必须)：huawei_p20, mumu
+
+> --count 参数指定本次作答题数(可选)
 ```python
+# MuMu模拟器
 (venv)$:python main.py --device mumu
+# 华为P20
+(venv)$:python main.py --device huawei_p20
 ```
 
-6. 由于终端设备差异导致UI布局不尽相同，对于未兼容的设备，欢迎大家为config.ini中增加xpath规则
+6. 由于终端设备差异导致UI布局不尽相同，对于未兼容的设备，欢迎大家在config.ini中增加xpath规则
+
+> TODO: 阅读文章、观看视频

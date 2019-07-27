@@ -43,7 +43,7 @@ class Bank(Base):
         self.bounds = bounds
 
     @classmethod
-    def from_xml(cls, device='virtual'):
+    def from_xml(cls, device='mumu'):
         # print("device", device)
         cfg = ConfigParser()
         cfg.read('./config.ini')
@@ -81,11 +81,15 @@ class Bank(Base):
         content = re.sub(r'(\s{2,})|(（\s*）)|(【\s*】)', '____', content)
         items = [x for x in (self.item1, self.item2, self.item3, self.item4) if x]
         # items = ['%c. %s'%(chr(i+65), x) for (i,x) in enumerate(items) if x]
-        index = ord(self.answer)-65
-        if index < len(items):
-            items[index] = f'**{items[index]}**'
+        if self.answer:
+            index = ord(self.answer)-65
+            if index < len(items):
+                items[index] = f'**{items[index]}**'
+            answer = f'**{self.answer.upper()}**'
+        else:
+            answer = ''
         options = '\n'.join([f'+ {x}' for x in items])
-        return f'{self.id}. {content} **{self.answer.upper()}**\n{options}\n'
+        return f'{self.id}. {content} {answer}\n{options}\n'
 
 
 class Model():
@@ -138,7 +142,7 @@ class Model():
         else:
             print('数据库无此纪录!')
 
-    def to_markdown(self, filename):
+    def export_markdown(self, filename):
         data = self.query()
         if not data:
             raise 'database is empty'
@@ -147,16 +151,35 @@ class Model():
             for item in data:
                 fp.write(str(item))
         print(f'题库已导出到{filename}')
+    
+    def export_excel(self, filename):
+        import xlwt
+        data = self.query()
+        wb = xlwt.Workbook(encoding='utf-8')
+        ws = wb.add_sheet('题库')
+        if not data:
+            raise 'database is empty'
+        ws.write(0, 0, '序号')
+        ws.write(0, 1, '题目')
+        ws.write(0, 2, '选项A')
+        ws.write(0, 3, '选项B')
+        ws.write(0, 4, '选项C')
+        ws.write(0, 5, '选项D')
+        ws.write(0, 6, '答案')
+        for d in data:
+            ws.write(d.id, 0, label=d.id)
+            ws.write(d.id, 1, label=d.content)
+            ws.write(d.id, 2, label=d.item1)
+            ws.write(d.id, 3, label=d.item2)
+            ws.write(d.id, 4, label=d.item3)
+            ws.write(d.id, 5, label=d.item4)
+            ws.write(d.id, 6, label=d.answer)
+        wb.save(filename)
+        print('题库已导出到%s'%filename)
 
 if __name__ == "__main__":
     db = Model()
-    for d in db.query():
-        print(d)
-    # db.to_markdown('./data/data-dev.md')
-    # bank = Bank.from_xml('terminal')
-    # bank = Bank.from_xml()
-    
-
-
-
-
+    # for d in db.query():
+    #     print(d)
+    # db.export_markdown('./data/data-dev.md')
+    db.export_excel('./data/data-dev.xls')

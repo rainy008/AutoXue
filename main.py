@@ -26,7 +26,7 @@ def attention(filename='attention.mp3', repeat=2):
     for i in range(repeat):
         playsound('./sounds/%s'%filename)
 
-def search(question):
+def search(question, headers):
     '''搜索引擎检索题目'''
     content = re.sub(r'[\(（]出题单位.*', "", question.content)
     print(content)
@@ -45,7 +45,13 @@ def start(device, count=None):
 
     cfg = ConfigParser()
     cfg.read('./config.ini')
-    if not count: count = cfg.getint('base', 'answer_count')
+    if not count:
+        count = cfg.getint('base', 'answer_count')
+    elif 0 >= count:
+        count = 65532
+    else:
+        pass
+        
     delay_rand = cfg.getboolean('base', 'delay_rand')
     delay = 1
     for i in range(count):
@@ -58,7 +64,7 @@ def start(device, count=None):
         if bank:
             index = ord(bank.answer)-65
             pos = complex(question.bounds.split(' ')[index])
-            print(bank)
+            print(question)
             print(f"\n {delay} 秒自动提交答案:  {bank.answer}\n")
             if 0j == pos:
                 t= threading.Thread(target=attention, args=('crossed.mp3',1))#创建线程
@@ -85,8 +91,12 @@ def start(device, count=None):
 
 if __name__ == "__main__":
     parse = ArgumentParser(description='学习强国挑战答题助手')
-    parse.add_argument('-d', '--device', metavar='device',default='mumu', help='指定一中终端类型，不同终端对应不同的xpath规则')
-    # parse.add_argument('-c', '--count', metavar='count',default='30', help='指定答题数量')
+    parse.add_argument('-d', '--device', metavar='device',default='huawei_p20', help='指定一中终端类型，不同终端对应不同的xpath规则')
+    parse.add_argument('-c', '--count', metavar='count',default='35', help='指定答题数量')
     args = parse.parse_args()
+    try:
+        count = int(args.count)
+    except Exception as e:
+        print(e)
 
-    start(args.device)
+    start(args.device, count)

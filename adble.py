@@ -13,7 +13,7 @@ import subprocess
 from configparser import ConfigParser
 
 class Adble(object):
-    def __init__(self, device='virtual'):
+    def __init__(self, device='mumu'):
         cfg = ConfigParser()
         cfg.read('./config.ini')
         self.filename = cfg.get(device, 'xml_uri')
@@ -46,4 +46,3 @@ class Adble(object):
 if __name__ == "__main__":
     adble = Adble()
     adble.get_xml()
-    # adble.tap(100, 100)
