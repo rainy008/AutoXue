@@ -3,6 +3,13 @@
 
 > 改进脚本，同时支持手机和MuMu模拟器，此外提供了xpath规则的扩展能力，可自行根据设备设计xpath规则
 
+> 好消息！好消息！，针对Mumu模拟器，脚本提供了每日答题支持
+
+下载安装[ADBKeyboard](./sources/ADBKeyboard.apk),并将其设为默认输入法，确认本机adb.exe版本号为最新版本[ADB 1.0.40](./sources/ADB 1.0.40.7z),模拟器中打开学习强国app停留在首页,运行脚本即可。
+```python
+(venv)$:python daily.py
+```
+
 采用adb模块获取手机UI布局的xml文件，通过lxml解析出题目内容和选项，答案提交并判断正确后将本题保存到数据库。
 
 

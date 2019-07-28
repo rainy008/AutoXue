@@ -43,10 +43,11 @@ class Bank(Base):
         self.bounds = bounds
 
     @classmethod
-    def from_xml(cls, device='mumu'):
+    def from_xml(cls, device):
         # print("device", device)
         cfg = ConfigParser()
-        cfg.read('./config.ini')
+        cfg.read('./default.ini')
+        cfg.read('./user.ini')
         filename = cfg.get(device, 'xml_uri')
         # print(f'Parse {filename}……')
         xml = etree.parse(filename)
@@ -77,6 +78,10 @@ class Bank(Base):
         # 统一题目内容的留空为两个英文下划线
         # 江南自古富庶地，风流才子美名扬，江南四大才子是__、__、__、__。 
         # 油锅起火时使用以下方法中__方法扑灭是不正确的。
+        if not self.id:
+            idx = ''
+        else:
+            idx = f'{self.id}. '
         content = re.sub(r'[\(（]出题单位.*', "", self.content)
         content = re.sub(r'(\s{2,})|(（\s*）)|(【\s*】)', '____', content)
         items = [x for x in (self.item1, self.item2, self.item3, self.item4) if x]
@@ -89,14 +94,12 @@ class Bank(Base):
         else:
             answer = ''
         options = '\n'.join([f'+ {x}' for x in items])
-        return f'{self.id}. {content} {answer}\n{options}\n'
+        return f'{idx}{content} {answer}\n{options}\n'
 
 
 class Model():
-    def __init__(self):
-        cfg = ConfigParser()
-        cfg.read('./config.ini')
-        database_uri = cfg.get('database', 'database_uri')
+    def __init__(self, database_uri, export_filename='data-dev'):
+        self.export_filename = export_filename
         # 初始化数据库连接:
         engine = create_engine(database_uri)
         # 创建DBSession类型:
@@ -142,7 +145,8 @@ class Model():
         else:
             print('数据库无此纪录!')
 
-    def export_markdown(self, filename):
+    def export_markdown(self):
+        filename = f'./export/{self.export_filename}.md'
         data = self.query()
         if not data:
             raise 'database is empty'
@@ -152,7 +156,8 @@ class Model():
                 fp.write(str(item))
         print(f'题库已导出到{filename}')
     
-    def export_excel(self, filename):
+    def export_excel(self):
+        filename = f'./export/{self.export_filename}.xls'
         import xlwt
         data = self.query()
         wb = xlwt.Workbook(encoding='utf-8')
@@ -178,8 +183,7 @@ class Model():
         print('题库已导出到%s'%filename)
 
 if __name__ == "__main__":
-    db = Model()
-    # for d in db.query():
-    #     print(d)
-    # db.export_markdown('./data/data-dev.md')
-    db.export_excel('./data/data-dev.xls')
+    db = Model(database_uri='sqlite:///./data-dev.sqlite', export_filename='data-dev-model')
+    for d in db.query():
+        print(d)
+

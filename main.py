@@ -39,46 +39,39 @@ def search(question, headers):
     print('%s\n请先在手机提交答案，根据提交结果输入答案！'%('-'*min(len(question.content)*2, 120)))
 
 
-def start(device, count=None):
+def start(device, count, filename, database_uri, delay_seconds, user_agent):
     m_ad = Adble(device)
-    m_db = Model()
-
-    cfg = ConfigParser()
-    cfg.read('./config.ini')
-    if not count:
-        count = cfg.getint('base', 'answer_count')
-    elif 0 >= count:
-        count = 65532
+    m_db = Model(database_uri, 'data-dev')
+    if 0 == delay_seconds:
+        delay_rand = True
     else:
-        pass
-        
-    delay_rand = cfg.getboolean('base', 'delay_rand')
-    delay = 1
+        delay_rand = False
+
     for i in range(count):
-        xml = m_ad.get_xml()
+        xml = m_ad.get_xml(filename)
         question = Bank.from_xml(device)
         bank = m_db.query(content=question.content)
         if delay_rand: 
-            delay = randint(1,6)
+            delay_seconds = randint(1,6)
 
         if bank:
             index = ord(bank.answer)-65
             pos = complex(question.bounds.split(' ')[index])
             print(question)
-            print(f"\n {delay} 秒自动提交答案:  {bank.answer}\n")
+            print(f"\n {delay_seconds} 秒自动提交答案:  {bank.answer}\n")
             if 0j == pos:
                 t= threading.Thread(target=attention, args=('crossed.mp3',1))#创建线程
                 t.start()
                 sleep(5)
                 continue
             else:
-                sleep(delay)
+                sleep(delay_seconds)
                 m_ad.tap(int(pos.real), int(pos.imag))
         else:
             t= threading.Thread(target=attention, args=('doubt.mp3',2))#创建线程
             t.start()
             headers = {
-                'User-Agent': cfg.get('base', 'user_agent')
+                'User-Agent': user_agent
             }
             search(question, headers)
             ch = input('请输入：').upper()
@@ -91,12 +84,26 @@ def start(device, count=None):
 
 if __name__ == "__main__":
     parse = ArgumentParser(description='学习强国挑战答题助手')
-    parse.add_argument('-d', '--device', metavar='device',default='huawei_p20', help='指定一中终端类型，不同终端对应不同的xpath规则')
+    parse.add_argument('-d', '--device', metavar='device',default='phone', help='指定一中终端类型，不同终端对应不同的xpath规则')
     parse.add_argument('-c', '--count', metavar='count',default='35', help='指定答题数量')
     args = parse.parse_args()
     try:
-        count = int(args.count)
+        count_question = int(args.count)
     except Exception as e:
         print(e)
 
-    start(args.device, count)
+    # 读取系统配置和用户配置，后面加载的具有高优先级
+    
+    cfg = ConfigParser()
+    cfg.read('./default.ini')
+    cfg.read('./user.ini')
+
+    device = args.device or cfg.get('base', 'device_type')
+    count_question = count_question or cfg.get('base', 'count_question')
+    filename = cfg.get(device, 'xml_uri')
+    delay_seconds = cfg.getint('base', 'delay_seconds')
+    user_agent = cfg.get('base', 'user_agent')   
+
+    database_uri = cfg.get('database', 'database_uri')
+
+    start(device, count_question, filename, database_uri, delay_seconds, user_agent)
