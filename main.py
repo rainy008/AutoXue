@@ -95,8 +95,8 @@ if __name__ == "__main__":
     # 读取系统配置和用户配置，后面加载的具有高优先级
     
     cfg = ConfigParser()
-    cfg.read('./default.ini')
-    cfg.read('./user.ini')
+    cfg.read('./default.ini', encoding='utf-8')
+    cfg.read('./user.ini', encoding='utf-8')
 
     device = args.device or cfg.get('base', 'device_type')
     count_question = count_question or cfg.get('base', 'count_question')
