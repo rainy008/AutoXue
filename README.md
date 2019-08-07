@@ -1,40 +1,33 @@
-# quizXue
-## 学习强国 挑战答题
+# 学习强国 答题2.0
 
-> 正如每日、每周、专项答题一样，目的是为了巩固知识，该脚本实现挑战答题辅助功能，可导出Excel题库或**磨题帮**题库。
+> 大家久等了！
 
-采用adb模块获取手机UI布局的xml文件，通过lxml解析出题目内容和选项，答案提交并判断正确后将本题保存到数据库。
+## 环境要求
+* os：推荐Win10
+* Python：python 3.6+ 推荐python 3.7.4
+* ADB：ADB1.0.39+ 推荐[ADB 1.0.40](./xuexi/src/assets/ADB_1_0_40.7z)
+* device：Android 推荐MuMu模拟器2.2.12
 
-
-
-> OCR截图： 不需针对不同案例设计相应的XPATH规则，但是对截图区域的设置提出要求，得到的数据准确度较高
-
-> XML解析：需要根据具体情况设置合适的XPATH规则，获得的数据准确度极高
-
-
-### 使用步骤
-1. 安装[ADB](https://adb.clockworkmod.com/),并配置环境变量
-> 参考[https://github.com/Skyexu/TopSup](https://github.com/Skyexu/TopSup)
-
-2. 手机连接电脑，开启USB调试模式
-
-3. python安装虚拟环境和模块
+## 使用方法
+1. 安装好Python、ADB、MuMu模拟器，并添加python和ADB环境变量
+2. 安装[ADBBoardkey](./xuexi/src/assets/ADBKeyboard.apk)输入法（解决输入中文）
+3. 安装[学习强国](./xuexi/src/assets/学习强国.apk)APP
+4. 双击运行初次安装.bat， 或者
 ```python
+# 安装虚拟环境
 python -m venv venv
-(venv)$:pip install -r requirements.txt
+# 安装项目依赖
+(venv)$:python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
-
-4. 手机进入挑战答题
-
-5. 运行脚本
+4. 打开MuMu模拟器（连接安卓手机需要开启USB调试），登录学习强国APP并置于首页
+5. 双击开始积分.bat， 或者
 ```python
-(venv)$:python main.py
+# 运行脚本程序
+(venv)$:python -m xuexi -a -c -d -v
+''' 参数说明
+    -a[--article]:      阅读文章(实现中)
+    -c[--challenge]:    挑战答题(已完成)
+    -d[--daily]:        每日答题(已完成)
+    -v[--video]:        视听学习(实现中)
+'''
 ```
-
-6. 直接执行model.py可将数据库导出到[题库](./data/data-dev.md)，可直接使用Ctrl+F搜索答案，也可直接下载使用[Excel版本](./data)。
-
-```python
-(venv)$:python model.py
-```
-
-> 展望： 数据库中未检索到记录时需要手机上提交之后在控制台手动提交添加记录到数据库，希望通过*adb shell getevent*获取手机输入事件，直接驱动脚本完成数据库的添加和转入下一流程
