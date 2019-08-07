@@ -33,7 +33,7 @@ class Quiz(object):
         round = cfg.getint('common', 'daily_round')
         count = cfg.getint('common', 'daily_count')
         dq.run(round, count)
-        logger.info('完成每日答题，请稍后片刻...')
+        logger.info('完成每日答题，请稍候片刻...')
         sleep(5)
 
     def _run_challenge(self):
@@ -41,7 +41,7 @@ class Quiz(object):
         cq = ChallengeQuiz(self.rules, self.ad, self.xm)
         count = cfg.getint('common', 'challenge_count')
         cq.run(count)
-        logger.info('完成挑战答题，请稍后片刻...')
+        logger.info('完成挑战答题，请稍候片刻...')
         sleep(5)
 
     def start(self, day, chg):

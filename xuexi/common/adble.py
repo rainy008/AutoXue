@@ -27,7 +27,6 @@ class Adble(object):
         else:            
             logger.info(f'未连接模拟器，请确认安卓手机连接手机并打开USB调试!')
         self.ime = self._getIME()
-        print(self.ime)
         self._setIME('com.android.adbkeyboard/.AdbIME')
 
     def _connect(self):
