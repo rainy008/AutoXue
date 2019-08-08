@@ -6,7 +6,7 @@
 * os：推荐Win10
 * Python：python 3.6+ 推荐python 3.7.4
 * ADB：ADB1.0.39+ 推荐[ADB 1.0.40](./xuexi/src/assets/ADB_1_0_40.7z)
-* device：Android 推荐MuMu模拟器2.2.12
+* device：Android 推荐[MuMu模拟器](http://mumu.163.com/)2.2.12
 
 ## 使用方法
 1. 安装好Python、ADB、MuMu模拟器，并添加python和ADB环境变量

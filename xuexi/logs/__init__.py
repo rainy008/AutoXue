@@ -39,7 +39,7 @@ def create_logger(loggername:str='logger', levelname:str='NOSET'):
 
     now = time.strftime("%Y%m%d")
     common_filename = f'{now}.log'
-    handler_common = logging.FileHandler(os.path.join(basedir, common_filename), mode='a', encoding='utf-8')
+    handler_common = logging.FileHandler(os.path.join(basedir, 'LOG', common_filename), mode='a', encoding='utf-8')
     handler_common.setLevel(logging.DEBUG)
     handler_common.setFormatter(logger_format)
 

@@ -102,7 +102,7 @@ venv.bak/
 
 # mypy
 .mypy_cache/
-# config-custom.ini
+config-custom.ini
 *.log
 *.xml
 *.png
