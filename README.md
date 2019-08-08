@@ -11,7 +11,7 @@
 ## 使用方法
 1. 安装好Python、ADB、MuMu模拟器，并添加python和ADB环境变量
 2. 安装[ADBBoardkey](./xuexi/src/assets/ADBKeyboard.apk)输入法（解决输入中文）
-3. 安装[学习强国](./xuexi/src/assets/学习强国.apk)APP
+3. 安装[学习强国](https://www.xuexi.cn/)APP
 4. 双击运行初次安装.bat， 或者
 ```python
 # 安装虚拟环境
