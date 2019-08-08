@@ -8,11 +8,11 @@
 @time: 2019-08-01(星期四) 20:55
 @Copyright © 2019. All rights reserved.
 '''
-import os
 import re
 import json
 import requests
 import string
+from pathlib import Path
 from random import randint
 from urllib.parse import quote
 from time import sleep
@@ -23,7 +23,7 @@ from .. import logger, cfg
 class ChallengeQuiz(object):
     def __init__(self, rules, ad, xm):
         self.rules = rules
-        self.filename = cfg.get('common', 'challenge_json')
+        self.filename = Path(cfg.get('common', 'challenge_json'))
         self.ad = ad
         self.xm = xm
         self.db = Model(cfg.get('common', 'database_challenge'))
@@ -42,6 +42,7 @@ class ChallengeQuiz(object):
         self._fresh()
         pos = self.xm.pos(cfg.get(self.rules, 'rule_challenge_entry'))
         self.ad.tap(pos)
+        logger.info(f'挑战答题，开始！')
         sleep(2)
 
     def _fresh(self):
@@ -52,14 +53,14 @@ class ChallengeQuiz(object):
         '''load json file'''
         filename = self.filename
         res = []
-        if(os.path.exists(filename)):
+        if self.filename.exists():
             with open(filename,'r',encoding='utf-8') as fp:
                 try:
                     res = json.load(fp)
                 except Exception:
                     logger.debug(f'加载JSON数据失败')
                 logger.debug(res)
-            logger.info(f'载入JSON数据{filename}')
+            logger.debug(f'载入JSON数据{filename}')
             return res
         else:
             logger.debug('JSON文件{filename}不存在')
@@ -71,7 +72,7 @@ class ChallengeQuiz(object):
         filename = self.filename
         with open(filename,'w',encoding='utf-8') as fp:
             json.dump(self.json_blank,fp,indent=4,ensure_ascii=False)
-        logger.info(f'导出JSON数据{filename}')
+        logger.debug(f'导出JSON数据{filename}')
         return True
 
     def _search(self):
@@ -93,6 +94,7 @@ class ChallengeQuiz(object):
 
         max_index = counts.index(max(counts))
         self.answer = chr(max_index+65)
+        logger.info(f'试探性提交答案 {self.answer}')
         return max_index
         
 
@@ -123,13 +125,14 @@ class ChallengeQuiz(object):
         self.content = self._content()
         self.options = self._optoins()
         self.pos = self._pos()
-        options = "\n".join([f' - {x}' for x in self.options.split(' ')])
+        options = "\n".join([f'{chr(i+65)}. {x}' for i, x in enumerate(self.options.split(' '))])
         print(f'\n[挑战题] {self.content[:45]}...\n{options}')
         bank = self.db.query(content=self.content, catagory='挑战题')
         if bank is not None:
             self.has_bank = True
             logger.debug('bank from database')
             cursor = ord(bank.answer) - 65
+            logger.info(f'自动提交答案 {bank.answer}')
             sleep(delay_seconds) # 延时按钮
         else:
             self.has_bank = False
@@ -159,7 +162,7 @@ class ChallengeQuiz(object):
             
 
     def _reopened(self, repeat:bool=False)->bool:
-        sleep(2)
+        # sleep(2)
         self._fresh()
         # 本题答对否
         if not self.xm.pos(cfg.get(self.rules, 'rule_judge_bounds')):

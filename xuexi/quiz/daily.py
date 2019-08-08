@@ -8,10 +8,10 @@
 @time: 2019-07-30(星期二) 22:56
 @Copyright © 2019. All rights reserved.
 '''
-import os
 import re
 import json
 from time import sleep
+from pathlib import Path
 from ..model import Bank, Model
 from .. import logger, cfg
 
@@ -24,7 +24,7 @@ class DailyQuiz(object):
         self.ad = ad
         self.xm = xm
         self.db = Model(cfg.get('common', 'database_daily'))
-        self.filename = cfg.get('common', 'daily_json')
+        self.filename = Path(cfg.get('common', 'daily_json'))
         self.catagory = ''
         self.content = ''
         self.options = ''
@@ -196,14 +196,14 @@ class DailyQuiz(object):
         '''load json file'''
         filename = self.filename
         res = []
-        if(os.path.exists(filename)):
+        if self.filename.exists():
             with open(filename,'r',encoding='utf-8') as fp:
                 try:
                     res = json.load(fp)
                 except Exception:
                     logger.debug(f'加载JSON数据失败')
                 logger.debug(res)
-            logger.info(f'载入JSON数据{filename}')
+            logger.debug(f'载入JSON数据{filename}')
             return res
         else:
             logger.debug('JSON文件{filename}不存在')
@@ -215,7 +215,7 @@ class DailyQuiz(object):
         filename = self.filename
         with open(filename,'w',encoding='utf-8') as fp:
             json.dump(self.json_blank,fp,indent=4,ensure_ascii=False)
-        logger.info(f'导出JSON数据{filename}')
+        logger.debug(f'导出JSON数据{filename}')
         return True
 
 
@@ -258,13 +258,12 @@ class DailyQuiz(object):
     def run(self, round=6, count=5):
         self._enter()
         # 每次回答5题，每日答题6组
-        logger.info(f'今日答题{round}组')
         while round:
             logger.info(f'\n<----正在答题,还剩 {round} 组---->')
             round = round -1
             for j in range(count):
                 self._dispatch()
-                sleep(2)
+                sleep(1)
             if round > 0:
                 sleep(10) # 平台奇葩要求，10秒内仅可答题一次
                 self._fresh()

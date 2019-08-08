@@ -216,11 +216,7 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
     from . import logger
     logger.debug('running __main__')
-    print('''使用说明：
-        python -m xuexi.model filename -b [upload|download] -c [挑战题|填空题|单选题|多选题]
-        eg. 
-    
-    ''')
+
 
     parse = ArgumentParser()
     parse.add_argument(dest='filename', metavar='filename', nargs="?", type=str, help='目标文件路径')
@@ -237,13 +233,19 @@ if __name__ == "__main__":
             db.upload(args.filename, args.catagory)
         else:
             pass
-    else:    
+    else:
         if args.display:
             data = db.query(catagory=args.catagory)
             for d in data:
                 print(d)
             print(f'总数 {len(data)}题')
         else:
+            print('''使用说明：
+    python -m xuexi.model filename -b [upload|download] -c [挑战题|填空题|单选题|多选题]
+    eg. 
+        python -m xuexi.model ./xuexi/src/json/daily.json -b upload
+        python -m xuexi.model ./xuexi/output.json
+''')
             data = db.query()
             print(f'总数 {len(data)}题')
             for catagory in ['挑战题', '填空题', '单选题', '多选题']:

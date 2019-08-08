@@ -22,12 +22,11 @@ def str2complex(s):
     return res
 
 class Xmler(object):
-    def __init__(self, filename:str):
-        self.filename = filename
-        # self.load()
+    def __init__(self, path):
+        self.path = path
 
     def load(self):
-        self.root = etree.parse(self.filename)
+        self.root = etree.parse(str(self.path))
 
     def _texts(self, rule:str)->list:
         '''return list<str>'''
