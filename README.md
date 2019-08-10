@@ -1,6 +1,6 @@
 # 学习强国 答题2.0
 
-> Add 视听学习
+> 由于增加了视听学习功能，故将项目改名为 AutoXue
 
 ## 环境要求
 * os：推荐Win10
@@ -20,7 +20,12 @@ python -m venv venv
 (venv)$:python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 4. 打开MuMu模拟器（连接安卓手机需要开启USB调试），登录学习强国APP并置于首页
-> 经测试，华为手机【我要答题】在一个容器中，无法获取布局，其他手机未测试。大家还是踏踏实实用模拟器吧，别再提无理要求了。
+> 经测试，华为手机用adb获取的布局UI xml文件坑能存在某些组件确实造成解析错误，程序异常终止。不过可以在华为手机上如下运行：
+
+···python
+(venv)$:python -m xuexi.media.viewer # 视听学习，测试通过，首页启动
+(venv)$:python -m xuexi.quiz.challenge # 挑战答题，测试通过，挑战答题页启动
+···
 5. 双击开始积分.bat， 或者
 ```python
 # 运行脚本程序
