@@ -1,6 +1,6 @@
 # 学习强国 答题2.0
 
-> 大家久等了！
+> Add 视听学习
 
 ## 环境要求
 * os：推荐Win10
@@ -24,10 +24,29 @@ python -m venv venv
 ```python
 # 运行脚本程序
 (venv)$:python -m xuexi -a -c -d -v
-''' 参数说明
+''' 请在首页运行, 参数按需添加
+参数说明
     -a[--article]:      阅读文章(实现中)
     -c[--challenge]:    挑战答题(已完成)
     -d[--daily]:        每日答题(已完成)
     -v[--video]:        视听学习(实现中)
+'''
+(venv)$:python -m xuexi.quiz.challenge -c 30 -v True|False
+'''请进入挑战答题后运行，手机也支持，
+参数说明
+    -c[--count] 挑战答题题数<int>, 自己指定， 默认10
+    -v[--virtual] 是否模拟器<bool>，配和config使用
+    eg.
+        (venv)$:python -m xuexi.quiz.challenge -c 30 -v # 模拟器中使用
+        (venv)$:python -m xuexi.quiz.challenge -c 30 # 手机中使用
+'''
+(venv)$:python -m xuexi.media.viewer -c 20 -d 30 -v True|False
+'''请在首页运行
+参数说明
+    -c[--count] 观看视频数<int>, 自己指定, 默认36
+    -d[--delay] 每个视频观看时间<int>, 自己指定， 默认30
+    eg.
+        (venv)$:python -m xuexi.media.viewer -c 20 -d 30 -v # 模拟器中使用
+        (venv)$:python -m xuexi.media.viewer -c 20 -d 30 # 手机中使用 
 '''
 ```
