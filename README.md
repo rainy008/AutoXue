@@ -20,6 +20,7 @@ python -m venv venv
 (venv)$:python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 4. 打开MuMu模拟器（连接安卓手机需要开启USB调试），登录学习强国APP并置于首页
+> 经测试，华为手机【我要答题】在一个容器中，无法获取布局，其他手机未测试。大家还是踏踏实实用模拟器吧，别再提无理要求了。
 5. 双击开始积分.bat， 或者
 ```python
 # 运行脚本程序
