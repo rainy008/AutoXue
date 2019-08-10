@@ -27,6 +27,7 @@ class Adble(object):
         else:            
             logger.info(f'请确保安卓手机连接手机并打开USB调试!')
         self.ime = self._getIME()
+        self.wmsize = self._size()
         self._setIME('com.android.adbkeyboard/.AdbIME')
 
     def _connect(self):
@@ -45,7 +46,24 @@ class Adble(object):
         else:
             logger.info(f'断开模拟器{self.host}:{self.port} 失败')
 
-    def wm_size(self):
+    def draw(self, orientation='down'):
+        height, width = max(self.wmsize), min(self.wmsize) # example: [1024, 576]
+        # 中点 三分之一点 三分之二点
+        x0, x1, x2 = width//2, width//3, width//3*2 
+        y0, y1, y2 = height//2, height//3, height//3*2
+        if 'down' == orientation:
+            self.swipe(x0, y1, x0, y1+100, 500)
+        elif 'up' == orientation:
+            self.swipe(x0, y2, x0, y2-100, 500)
+        elif 'left' == orientation:
+            self.swipe(x2, y0, x2-100, y0, 500)
+        elif 'right' == orientation:
+            self.swipe(x1, y0, x1+100, y0, 500)
+        else:
+            logger.debug(f'没有这个方向 {orientation} 无法划动')
+        return 0
+    
+    def _size(self):
         res = subprocess.check_output('adb shell wm size', shell=False)
         if isinstance(res, bytes):
             wmsize = re.findall(r'\d+', str(res, 'utf-8'))
@@ -76,19 +94,21 @@ class Adble(object):
         return ime[0]
         
 
-    def uiautomator(self, path=None, filesize=9000):
+    def uiautomator(self, path=None, filesize=10240):
         if not path:
             path = self.path
-        for i in range(3):
+        for i in range(10):
             if path.exists():
                 path.unlink()
             else:
-                logger.debug('文件不存在')
+                logger.debug('文件不存在,无需删除')
             subprocess.check_call(f'adb shell uiautomator dump /sdcard/ui.xml', shell=True, stdout=subprocess.PIPE)
             # sleep(1)
             subprocess.check_call(f'adb pull /sdcard/ui.xml {path}', shell=True, stdout=subprocess.PIPE)
             if filesize < path.stat().st_size:
                 break
+            else:
+                sleep(1)
 
     def screenshot(self, path=None):
         if not path:
@@ -105,7 +125,17 @@ class Adble(object):
         # sleep(1)
         return res
 
-    def tap(self, x, y=None):
+    def slide(self, begin, end, duration=500):
+        '''接收complex参数坐标'''
+        logger.debug(f'滑动操作 {begin} --{duration}ms-> {end}')
+        sx, sy = int(begin.real), int(begin.imag)
+        dx, dy = int(end.real), int(end.imag)
+        res = subprocess.check_call(f'adb shell input swipe {sx} {sy} {dx} {dy} {duration}', shell=True, stdout=subprocess.PIPE)
+        # sleep(1)
+        return res
+
+
+    def tap(self, x, y=None, duration=50):
         # subprocess.check_call(f'adb shell input tap {x} {y}', shell=True, stdout=subprocess.PIPE)
         '''改进tap为长按50ms，避免单击失灵'''
         if y is not None:
@@ -116,7 +146,7 @@ class Adble(object):
         else:
             dx, dy = int(x.real), int(x.imag)
         logger.debug(f'触摸操作 ({dx}, {dy})')
-        return self.swipe(dx, dy, dx, dy, 50)
+        return self.swipe(dx, dy, dx, dy, duration)
 
     def back(self):
         # adb shell input keyevent 4 
@@ -136,7 +166,6 @@ class Adble(object):
 
 if __name__ == "__main__":
     from argparse import ArgumentParser
-    from .. import logger
     logger.debug('running adble.py')
     parse = ArgumentParser()
     parse.add_argument(dest='filename', metavar='filename', nargs="?", type=str, help='目标文件路径')

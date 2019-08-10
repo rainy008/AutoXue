@@ -39,7 +39,11 @@ class App(object):
         logger.info(f'阅读文章功能正在实现中')
 
     def _vdo_run(self):
-        logger.info(f'视听学习功能正在实现中')
+        logger.debug(f'视听学习，开始')
+        vd = viewer.Viewer(self.rules, self.ad, self.xm)
+        count = cfg.getint('common', 'video_count')
+        delay = cfg.getint('common', 'video_delay')
+        vd.run(count, delay)
 
     def _quiz_run(self, day, chg):
         logger.debug(f'我要答题，开始')
@@ -47,14 +51,19 @@ class App(object):
         qApp.start(day, chg)
 
     def start(self, art, vdo, day, chg):
-        if art:
-            self._art_run()
-        if vdo:
-            self._vdo_run()
         if day or chg:
             with timer.Timer() as t:
                 self._quiz_run(day, chg)
             logger.info(f'答题耗时 {t.elapsed} 秒')
+
+        if art:
+            with timer.Timer() as t:
+                self._art_run()
+            logger.info(f'阅读耗时 {t.elapsed} 秒')
+        if vdo:
+            with timer.Timer() as t:
+                self._vdo_run()
+            logger.info(f'观影耗时 {t.elapsed} 秒')
 
 
     def __del__(self):
@@ -64,6 +73,8 @@ class App(object):
     
         
 
-from .quiz import Quiz
+
 from .common import adble, xmler, timer
 from .model import Model
+from .quiz import Quiz
+from .media import viewer

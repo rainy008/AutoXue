@@ -43,6 +43,7 @@ class DailyQuiz(object):
         self._fresh()
         pos = self.xm.pos(cfg.get(self.rules, 'rule_daily_entry'))
         self.ad.tap(pos)
+        sleep(10)
  
     def _fresh(self):
         self.ad.uiautomator()
@@ -168,7 +169,7 @@ class DailyQuiz(object):
         return res
 
     def _save(self):
-        if not self.has_bank and '未知题目类型' != self.catagory:
+        if not self.has_bank and '未知题目类型' != self.catagory and '' != self.content:
             bank = Bank.from_daily(catagory=self.catagory, 
                                     content=self.content, 
                                     options=self.options, 
@@ -272,8 +273,21 @@ class DailyQuiz(object):
         self._return()
         self._dump()
         return True
-                
+            
 
+if __name__ == "__main__":
+    from argparse import ArgumentParser
+    from ..common import adble, xmler
+    logger.debug('running daily.py')
+    parse = ArgumentParser()
+    parse.add_argument('-c', '--count', metavar='count', type=int, default=1, help='每日答题组数')
+    parse.add_argument('-v', '--virtual', metavar='virtual', nargs='?', const=True, type=bool, default=False, help='是否模拟器')
 
+    args = parse.parse_args()
+    path = Path('./xuexi/src/xml/daily.xml')
+    ad = adble.Adble(path, args.virtual)
+    xm = xmler.Xmler(path)
+    cg = DailyQuiz('mumu', ad, xm)
+    cg.run(args.count)
 
 

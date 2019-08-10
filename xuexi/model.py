@@ -66,8 +66,8 @@ class Bank(Base):
         return self.content == other.content
     
     @classmethod
-    def from_challenge(cls, content, options='', answer='', bounds=''):
-        return cls(catagory='挑战题', content=content, options=options, answer=answer, note='', bounds=bounds)
+    def from_challenge(cls, content, options='', answer='', note='', bounds=''):
+        return cls(catagory='挑战题', content=content, options=options, answer=answer, note=note, bounds=bounds)
 
     @classmethod
     def from_daily(cls, catagory, content, options, answer, note):

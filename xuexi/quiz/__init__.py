@@ -49,10 +49,7 @@ class Quiz(object):
 
     def start(self, day, chg):
         # 刷新一下
-        height, width = self.ad.wm_size() # example: [1024, 576]
-        x0 = width//2
-        y0 = height//3
-        self.ad.swipe(x0, y0, x0, y0+200, 1000)
+        self.ad.draw('down')
         sleep(3)
 
         # 点击我的
