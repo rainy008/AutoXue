@@ -15,7 +15,7 @@ $:git clone https://github.com/kessil/AutoXue.git --depth=1
 ## 使用方法
 0. 很重要！首先请确认自己的操作系统，XP系统只能安装python3.4-，请不要往下看了，项目要求python版本最低3.6，因为python3.6+加入了本项目使用的f-string特性，另、操作系统太低可能无法安装使用模拟器，所以，系统不符合的用户真心不要浪费时间往下看了
 1. 安装好Python、ADB、MuMu模拟器，并添加python和ADB环境变量
-2. 安装[ADBBoardkey](./xuexi/src/assets/ADBKeyboard.apk)输入法（解决输入中文）
+2. 安装[ADBkeyboard](./xuexi/src/assets/ADBKeyboard.apk)输入法（解决输入中文）
 3. 安装[学习强国](https://www.xuexi.cn/)APP，测试版本为2.5.0
 4. 双击运行初次安装.bat， 或者
 ```python
@@ -79,3 +79,5 @@ python -m venv venv
         (venv)$:python -m xuexi.media.reader -c 20 -d 30 # 手机中使用 
 '''
 ```
+## TODO
+建立article、video清单，防止重复刷到影响积分，修复视频上拉进入下一条失败

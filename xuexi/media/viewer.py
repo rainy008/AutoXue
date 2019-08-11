@@ -99,3 +99,5 @@ if __name__ == "__main__":
     xm = xmler.Xmler(path)
     cg = Viewer('mumu', ad, xm)
     cg.run(args.count, args.delay)
+
+    ad.close()

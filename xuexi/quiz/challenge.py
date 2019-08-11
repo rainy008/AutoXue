@@ -289,5 +289,7 @@ if __name__ == "__main__":
     cg = ChallengeQuiz('mumu', ad, xm)
     cg.runonce(args.count)
 
+    ad.close()
+
 
 

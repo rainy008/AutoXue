@@ -142,24 +142,36 @@ class Reader:
         sleep(1) 
 
 
-    def collect_comments(self):
+    def collect_comments(self, tag='default'):
         json_comments = self._load()
         flag = True
-        rule = f'//node[@class="android.support.v7.widget.RecyclerView"]/node/node[2]/node'
-
+        rule = f'//node[@text="・回复"]/../preceding-sibling::node[1]/node'
+        middle_width = min(self.ad.wmsize)//2
+        logger.debug(f'抓取评论，开始！')
+        self._fresh()
+        pos = self.xm.pos('//node[@text="欢迎发表你的观点"]/../node[2]/@bounds')
+        self.ad.tap(pos)
+        sleep(2)
         while flag:
             self._fresh()
             comments = [(t,p) for t,p in zip(self.xm.texts(f'{rule}/@text'), self.xm.pos(f'{rule}/@bounds'))]
-            fixed = comments[0]
-            for comment in comments:
-                print(comment)
-                json_comments.append(comment[0])
-            else:
+            fixed = (100, comments[0][1].imag)[len(comments)>0]
+            for comment in comments:                
+                if len(comment[0]) < 15:
+                    logger.debug(f'放弃 {comment[0]}')
+                else: # if else
+                    if comment[0] in json_comments.get(tag, list()):
+                        logger.debug(f' 重复 {comment[0]}')
+                    else: # if else
+                        logger.info(f'添加 {comment[0]}')
+                        json_comments.setdefault(tag, list()).append(comment[0])
+            else: # for else
                 if self.xm.pos('//node[@text="已显示全部观点"]/@bounds'):
                     flag = False
                     break
                 else:
-                    self.ad.slide(comment[1], fixed[1])
+                    dynamic = (max(self.ad.wmsize)-100, comment[1].imag)[len(comments)>0]
+                    self.ad.slide(complex(middle_width, dynamic), complex(middle_width, fixed))
         self._dump(json_comments)
 
 
@@ -183,7 +195,13 @@ class Reader:
                     count -= 1
                     logger.debug(f'阅读一篇新闻 {article[0]}')
                     logger.info(f'[{count:>02}] {article[0]}...')
-                    msg = choice(self.json_comments) or f'{article[0]} 不忘初心牢记使命！为实现中华民族伟大复兴的中国梦不懈奋斗！'
+                    keywords = self.json_comments.keys()
+                    for keyword in keywords:
+                        if keyword in article[0]:
+                            msg = choice(self.json_comments[keyword]) or f'{article[0]} 不忘初心牢记使命！为实现中华民族伟大复兴的中国梦不懈奋斗！'
+                            break
+                    else:
+                        msg = choice(self.json_comments['default']) or f'{article[0]} 不忘初心牢记使命！为实现中华民族伟大复兴的中国梦不懈奋斗！'
                     self.ad.tap(article[1])
                     sleep(1)
                     self._read_news(count, delay)
@@ -215,7 +233,9 @@ if __name__ == '__main__':
     parse.add_argument('-c', '--count', metavar='count', type=int, default=25, help='观看视频数')
     parse.add_argument('-d', '--delay', metavar='delay', type=int, default=30, help='单个视频观看时间')
     parse.add_argument('-s', '--star', metavar='star', type=int, default=2, help='单个视频观看时间')
+    parse.add_argument('-t', '--tag', metavar='tag', type=str, default='default', help='抓评论的tag')
     parse.add_argument('-v', '--virtual', metavar='virtual', nargs='?', const=True, type=bool, default=False, help='是否模拟器')
+    parse.add_argument('-m', '--comment', metavar='comment', nargs='?', const=True, type=bool, default=False, help='搜集留言')
     args = parse.parse_args()
 
     path = Path('./xuexi/src/xml/reader.xml')
@@ -223,7 +243,11 @@ if __name__ == '__main__':
     xm = xmler.Xmler(path)
 
     rd = Reader('mumu', ad, xm)
-    rd.run(args.count, args.delay, args.star)
-    
-    # 收集评论用
-    # rd.collect_comments()
+    if not args.comment:
+        rd.run(args.count, args.delay, args.star)
+    else:
+        # 收集评论用，请先注释上一行，取消注释下一行，页面置于评论页，第一条评论在屏幕顶端， 运行python -m xuexi.media.reader -v
+        # 新的使用方法 venv\scripts\python -m xuexi.media.reader -v -m -t {tag}
+        rd.collect_comments(args.tag)
+
+    ad.close()

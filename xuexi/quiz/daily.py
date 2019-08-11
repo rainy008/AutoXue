@@ -273,6 +273,14 @@ class DailyQuiz(object):
         self._return()
         self._dump()
         return True
+
+    def weekly(self, count=5):
+        while count:
+            count -= 1
+            self._dispatch()
+
+
+
             
 
 if __name__ == "__main__":
@@ -289,5 +297,10 @@ if __name__ == "__main__":
     xm = xmler.Xmler(path)
     cg = DailyQuiz('mumu', ad, xm)
     cg.run(args.count)
+
+    # 每周答题，请先注释上一行,取消注释下一行，页面置于每周答题第一题，运行python -m xuexi.quiz.daily -v
+    # cg.weekly() 
+
+    ad.close()
 
 
