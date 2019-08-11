@@ -36,7 +36,13 @@ class App(object):
         self.xm = xmler.Xmler(self.xmluri)
 
     def _art_run(self):
-        logger.info(f'阅读文章功能正在实现中')
+        logger.debug(f'阅读文章,开始')
+        rd = reader.Reader(self.rules, self.ad, self.xm)
+        count = cfg.getint('common', 'article_count')
+        delay = cfg.getint('common', 'article_delay')
+        ssc = cfg.getint('common', 'star_share_comment')       # star_share_comment 收藏、分享、留言
+        rd.run(count, delay, ssc)
+
 
     def _vdo_run(self):
         logger.debug(f'视听学习，开始')
@@ -54,17 +60,18 @@ class App(object):
         if day or chg:
             with timer.Timer() as t:
                 self._quiz_run(day, chg)
-            logger.info(f'答题耗时 {t.elapsed} 秒')
+            logger.info(f'答题耗时 {round(t.elapsed, 2)} 秒')
 
-        if art:
-            with timer.Timer() as t:
-                self._art_run()
-            logger.info(f'阅读耗时 {t.elapsed} 秒')
         if vdo:
             with timer.Timer() as t:
                 self._vdo_run()
-            logger.info(f'观影耗时 {t.elapsed} 秒')
-
+            logger.info(f'观影耗时 {round(t.elapsed, 2)} 秒')
+        
+        if art:
+            with timer.Timer() as t:
+                self._art_run()
+            logger.info(f'阅读耗时 {round(t.elapsed, 2)} 秒')
+        
 
     def __del__(self):
         self.ad.close()
@@ -77,4 +84,4 @@ class App(object):
 from .common import adble, xmler, timer
 from .model import Model
 from .quiz import Quiz
-from .media import viewer
+from .media import viewer, reader

@@ -198,7 +198,7 @@ class ChallengeQuiz(object):
             return False
         
         # 分享复活否？ 否！ 由于复活按钮在闪动，不好点击，还是不要那么贪心吧
-        # pos = self.xm.pos(cfg.get(self.rules, 'rule_share_bounds'))
+        # pos = self.xm.pos(cfg.get(self.rules, 'rule_revive_bounds'))
         # if pos:
         #     # self._commet()
         #     logger.debug('点击分享复活')
@@ -240,21 +240,21 @@ class ChallengeQuiz(object):
             
 
     def _run(self, count):
-        is_dead = False
-        round = count
+        # is_dead = False
+        sub_count = count
         self._enter()
-        while round:
+        while sub_count:
             self._submit()
             if self._reopened(): # 回答正确
-                round = round - 1
+                sub_count = sub_count - 1
             else:
-                is_dead = True
+                # is_dead = True
                 break
-        if not is_dead:
+        else:
             logger.info(f'已达成目标题数，延时30秒等待死亡中...')
             sleep(30)
         self.ad.back()   
-        return round
+        return sub_count
 
     def run(self, count):
         while True:
@@ -266,11 +266,11 @@ class ChallengeQuiz(object):
                 logger.info(f'未达成目标题数，再来一局')
             self._dump()
 
-    def runonce(self, round):
-        while round:
+    def runonce(self, sub_count):
+        while sub_count:
             self._submit()
             if self._reopened(): # 回答正确
-                round = round - 1
+                sub_count = sub_count - 1
             else:
                 break
 

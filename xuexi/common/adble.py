@@ -46,19 +46,19 @@ class Adble(object):
         else:
             logger.info(f'断开模拟器{self.host}:{self.port} 失败')
 
-    def draw(self, orientation='down'):
+    def draw(self, orientation='down', distance=100, duration=500):
         height, width = max(self.wmsize), min(self.wmsize) # example: [1024, 576]
         # 中点 三分之一点 三分之二点
         x0, x1, x2 = width//2, width//3, width//3*2 
         y0, y1, y2 = height//2, height//3, height//3*2
         if 'down' == orientation:
-            self.swipe(x0, y1, x0, y1+100, 500)
+            self.swipe(x0, y1, x0, y1+distance, duration)
         elif 'up' == orientation:
-            self.swipe(x0, y2, x0, y2-100, 500)
+            self.swipe(x0, y2, x0, y2-distance, duration)
         elif 'left' == orientation:
-            self.swipe(x2, y0, x2-100, y0, 500)
+            self.swipe(x2, y0, x2-distance, y0, duration)
         elif 'right' == orientation:
-            self.swipe(x1, y0, x1+100, y0, 500)
+            self.swipe(x1, y0, x1+distance, y0, duration)
         else:
             logger.debug(f'没有这个方向 {orientation} 无法划动')
         return 0
@@ -97,7 +97,7 @@ class Adble(object):
     def uiautomator(self, path=None, filesize=10240):
         if not path:
             path = self.path
-        for i in range(10):
+        for i in range(3):
             if path.exists():
                 path.unlink()
             else:
@@ -154,7 +154,7 @@ class Adble(object):
         subprocess.check_call(f'adb shell input keyevent 4', shell=True, stdout=subprocess.PIPE)
 
 
-    def text(self, msg):
+    def input(self, msg):
         logger.debug(f'输入文本 {msg}')
         # subprocess.check_call(f'adb shell input text {msg}', shell=True, stdout=subprocess.PIPE)
         subprocess.check_call(f'adb shell am broadcast -a ADB_INPUT_TEXT --es msg {msg}', shell=True, stdout=subprocess.PIPE)

@@ -68,13 +68,13 @@ class DailyQuiz(object):
             answers = bank.answer.split(' ')
             for edit, answer in zip(edits, answers):
                 self.ad.tap(edit)
-                self.ad.text(answer)
+                self.ad.input(answer)
         else:
             logger.info(f'默认提交答案: 不忘初心牢记使命')
             self.options = f'{self.count_blank}'
             for edit in edits:
                 self.ad.tap(edit)
-                self.ad.text('不忘初心牢记使命')
+                self.ad.input('不忘初心牢记使命')
 
 
 
@@ -256,16 +256,16 @@ class DailyQuiz(object):
             self._submit()  # 点击下一题或者完成
     
 
-    def run(self, round=6, count=5):
+    def run(self, group=6, count=5):
         self._enter()
         # 每次回答5题，每日答题6组
-        while round:
-            logger.info(f'\n<----正在答题,还剩 {round} 组---->')
-            round = round -1
+        while group:
+            logger.info(f'\n<----正在答题,还剩 {group} 组---->')
+            group = group -1
             for j in range(count):
                 self._dispatch()
                 sleep(1)
-            if round > 0:
+            if group > 0:
                 sleep(10) # 平台奇葩要求，10秒内仅可答题一次
                 self._fresh()
                 self._next()

@@ -10,9 +10,9 @@
 '''
 
 import re
+from pathlib import Path
 from lxml import etree
 from .. import logger
-
 
 def str2complex(s):
     x0, y0, x1, y1 = [int(x) for x in re.findall(r'\d+', s)]
@@ -21,14 +21,16 @@ def str2complex(s):
     logger.debug(res)
     return res
 
+
 class Xmler(object):
-    def __init__(self, path):
+    def __init__(self, path=Path('./xuexi/src/xml/reader.xml')):
         self.path = path
+        self.root = None
 
     def load(self):
         self.root = etree.parse(str(self.path))
 
-    def _texts(self, rule:str)->list:
+    def texts(self, rule:str)->list:
         '''return list<str>'''
         # logger.debug(f'xpath texts: {rule}')
         res = [x.replace(u'\xa0', u' ') for x in self.root.xpath(rule)]
@@ -39,7 +41,7 @@ class Xmler(object):
     def pos(self, rule:str)->list:
         '''return list<complex>'''
         logger.debug(rule)
-        res = self._texts(rule)
+        res = self.texts(rule)
         logger.debug(res)
         points = [str2complex(x) for x in res]
         if len(points) == 1:
@@ -52,9 +54,9 @@ class Xmler(object):
     def content(self, rule:str)->str:
         '''return str'''
         logger.debug(rule)
-        # res = self._texts(rule) # list<str>
-        # res = ' '.join([" ".join(x.split()) for x in self._texts(rule)])
-        res = ''.join(self._texts(rule))
+        # res = self.texts(rule) # list<str>
+        # res = ' '.join([" ".join(x.split()) for x in self.texts(rule)])
+        res = ''.join(self.texts(rule))
         logger.debug(res)
         return res
 
@@ -70,3 +72,26 @@ class Xmler(object):
         logger.debug(rule)
         res = self.root.xpath(rule)
         return len(res)
+
+    # def element(self, rule:str)->object:
+    #     res = self.root.xpath(rule)
+    #     return res
+
+
+
+if __name__ == "__main__":
+    from argparse import ArgumentParser    
+    from pathlib import Path
+    logger.debug('running xmler.py')
+    parse = ArgumentParser()
+    parse.add_argument(dest='filename', metavar='filename', nargs="?", type=str, default='./xuexi/src/xml/reader.xml', help='目标文件路径')
+    args = parse.parse_args()
+
+    path = Path(args.filename)
+    xm = Xmler(path)
+    xm.load()
+    cols = xm.xpath('//node[@class="android.widget.LinearLayout"]/node[@class="android.widget.LinearLayout"]/node[@class="android.view.ViewGroup"]/node[@class="android.widget.LinearLayout"]')
+    for c in cols:
+        print(c.xpath('./node/@text'))
+        print(c.xpath('./@bounds'))
+    print(c.str2complex('[488,87][521,144]'))

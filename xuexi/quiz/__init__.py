@@ -63,18 +63,20 @@ class Quiz(object):
         self._fresh()
         pos = self.xm.pos(cfg.get(self.rules, 'rule_quiz_entry'))
         self.ad.tap(pos)
-        logger.debug(f'这里等10秒钟，布局刷新比较慢')
+        logger.debug(f'我要答题这里等10秒钟，布局刷新比较慢')
         sleep(10)
         self._fresh()
         self.back = self.xm.pos(cfg.get(self.rules, 'rule_quiz_exit'))
         if day:
             logger.debug(f'开始每日答题')
             self._run_daily()
+            sleep(5)
         else:
             logger.debug(f'未选择执行每日答题')
         if chg:
             logger.debug(f'开始挑战答题')
             self._run_challenge()
+            sleep(5)
         else:
             logger.debug(f'未选择执行挑战答题')
 
@@ -82,3 +84,4 @@ class Quiz(object):
         # sleep(2)
         self.ad.tap(self.back)
         self.ad.tap(self.home)
+        sleep(5)

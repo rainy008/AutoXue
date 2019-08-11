@@ -11,6 +11,7 @@
 
 from time import sleep
 from .. import logger, cfg
+from ..common import timer
 
 class Viewer:
     '''设计思路：
@@ -66,16 +67,19 @@ class Viewer:
         # self._fresh()        
         self.ad.tap(self.home)
         logger.debug(f'点击HOME {self.home}')
+        sleep(5)
 
     def run(self, count=36, delay=30):
         '''运行脚本，count刷视频数，delay每个视频观看时间'''
         self.enter()
-        while count:            
-            count -= 1
-            logger.info(f'正在视听学习 第 {count+1:2} 条，还剩 {count:2} 条，{delay:2} 秒后进入下一条...')
-            logger.debug(f'观看{delay}秒中...')            
-            sleep(delay)
-            self.next()
+        while count:  
+            with timer.Timer() as t:          
+                count -= 1
+                # logger.info(f'正在视听学习 第 {count+1:2} 条，还剩 {count:2} 条，{delay:2} 秒后进入下一条...')
+                logger.debug(f'观看{delay}秒中...')            
+                sleep(delay)
+                self.next()
+            logger.info(f'视听学习第 {count} 则，耗时 {round(t.elapsed, 2):<05} 秒')
         self.exit()
         logger.info(f'视听学习完成，返回首页')
 
