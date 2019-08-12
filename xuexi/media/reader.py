@@ -13,7 +13,14 @@ from random import choice
 from pathlib import Path
 from time import sleep
 from .. import logger, cfg
+from ..model import Model
 from ..common import timer
+
+offset_dict = {
+    864: '17',
+    1024: '23',
+    2240: '35'
+}
 
 class Reader:
     '''设计思路：
@@ -30,10 +37,12 @@ class Reader:
         self.rules = rules
         self.ad = ad
         self.xm = xm
+        self.db = Model(cfg.get('common', 'database_article'))
 
         self.home = 0j
         self.feeds = 0j
-        self.fixed = 0j
+        self.fixed_top = 0j
+        self.fixed_bottom = 0j
         self.json_comments = self._load()
 
     def _fresh(self):
@@ -51,7 +60,6 @@ class Reader:
                     res = json.load(fp)
                 except Exception:
                     logger.debug(f'加载JSON数据失败')
-                logger.debug(res)
             logger.debug(f'载入JSON数据{path}')
             return res
         else:
@@ -93,15 +101,17 @@ class Reader:
         total_delay = delay
         # logger.info(f'[{count}] 正在阅读，请勿打扰！{total_delay}秒...')
         
-        slide_times = 5 # 上划次数
+        slide_times = 2 # 上划次数
         per_delay = total_delay // slide_times
         logger.debug(f'阅读时长{total_delay},上划{slide_times}次，每次{per_delay}秒')
-        sleep(5) # 等待文章渲染
-        for i in range(slide_times):
-            self.ad.draw('up', distance=500)
-            sleep(per_delay)
+        sleep(3) # 等待文章渲染
+        logger.debug(f'正在阅读新闻 {total_delay} 秒...')
+        sleep(total_delay)
+        # for i in range(slide_times):
+        #     self.ad.draw('up', distance=500)
+        #     sleep(per_delay)
 
-    def _star_share_comment(self, msg):
+    def _star_share_comment(self, title):
         self._fresh()
         pos_star = self.xm.pos(cfg.get(self.rules, 'rule_star_bounds'))
         pos_share = self.xm.pos(cfg.get(self.rules, 'rule_share_bounds'))
@@ -120,6 +130,15 @@ class Reader:
         self.ad.back()
         sleep(1)
 
+        # 随机取一条留言
+        keywords = self.json_comments.keys()
+        for keyword in keywords:
+            if keyword in title:
+                msg = choice(self.json_comments[keyword]) or f'{title} 不忘初心牢记使命！为实现中华民族伟大复兴的中国梦不懈奋斗！'
+                break
+        else:
+            # 没有一个关键词匹配，双随机：随机关键词中的随机评论
+            msg = choice(self.json_comments[choice(list(keywords))]) or f'{title} 不忘初心牢记使命！为实现中华民族伟大复兴的中国梦不懈奋斗！'
        
         # 留言
         self.ad.tap(pos_comment)
@@ -127,12 +146,26 @@ class Reader:
         
         self.ad.input(msg)
         logger.info(f'留言一篇文章: {msg}')        
-        sleep(1)
+        sleep(3)
         self.ad.uiautomator(filesize=2000)
         self.xm.load()
         pos_publish = self.xm.pos(cfg.get(self.rules, 'rule_publish_bounds'))
         self.ad.tap(pos_publish)
-        self.ad.tap(pos_publish-23j) # 不知道为什么，有时发布按钮解析的位置会出现23px的偏差，所以，这里点击两次怕点不到
+        sleep(1)
+        # 坑爹的输入法栏，害我要再来一遍
+        while True:
+            self.ad.uiautomator(filesize=2000)
+            self.xm.load()
+            pos_publish2 = self.xm.pos(cfg.get(self.rules, 'rule_publish_bounds'))
+            if pos_publish2 == pos_publish:
+                logger.debug(f'# {pos_publish}没点着，按偏移量再点一次')
+                offset = offset_dict[max(self.ad.wmsize)]
+                logger.debug(f'发布按钮偏移量 {offset} 屏幕大小 {self.ad.wmsize}')
+                self.ad.tap(pos_publish-complex(f'{offset}j')) # 由于下面有一栏输入法提示，导致这里pos或出现offset位置偏差，多点一次
+            else:
+                logger.debug('# 点着了，不用点了')
+                break
+                
         sleep(1)
 
         # 收藏
@@ -179,43 +212,41 @@ class Reader:
 
     def run(self, count=25, delay=30, ssc=2):
         self.enter()    
-        logger.info(f'新闻学习中...')      
+        logger.info(f'新闻学习中...')
+        self.fixed_top = self.xm.pos(cfg.get(self.rules, 'rule_fixed_top_bounds'))        
         while count>0:
             self._fresh()
-            articles = [(t, p) for t, p in zip(self.xm.texts(cfg.get(self.rules, 'rule_news_content')), self.xm.pos(cfg.get(self.rules, 'rule_news_bounds')))]
-            if 0j == self.fixed:
-                self.fixed = self.xm.pos(cfg.get(self.rules, 'rule_news_fixed_bounds'))
-                begin = 0
-            else:
-                begin = 1
-            logger.debug(f'固定坐标点 {self.fixed}')
-            # logger.debug(f'{articles}')
-            for article in articles[begin:]:
+            pos_bottom = self.xm.pos(cfg.get(self.rules, 'rule_fixed_bottom_bounds'))
+            if pos_bottom.imag > self.fixed_bottom.imag:
+                self.fixed_bottom = pos_bottom
+            logger.debug(f'固定坐标点 TOP: {self.fixed_top}\tBOTTOM: {self.fixed_bottom}')
+            poslist = self.xm.pos(cfg.get(self.rules, "rule_news_bounds"))
+            if isinstance(poslist, complex):
+                poslist = [poslist]
+            articles = [(t, p) for t, p in zip(self.xm.texts(cfg.get(self.rules, "rule_news_content")), poslist)]
+            for title, pos in articles:
+                if self.db.has_article(title):
+                    continue
                 with timer.Timer() as t:
                     count -= 1
-                    logger.debug(f'阅读一篇新闻 {article[0]}')
-                    logger.info(f'[{count:>02}] {article[0]}...')
-                    keywords = self.json_comments.keys()
-                    for keyword in keywords:
-                        if keyword in article[0]:
-                            msg = choice(self.json_comments[keyword]) or f'{article[0]} 不忘初心牢记使命！为实现中华民族伟大复兴的中国梦不懈奋斗！'
-                            break
-                    else:
-                        msg = choice(self.json_comments['default']) or f'{article[0]} 不忘初心牢记使命！为实现中华民族伟大复兴的中国梦不懈奋斗！'
-                    self.ad.tap(article[1])
+                    logger.debug(f'阅读一篇新闻 {title}')
+                    logger.info(f'[{count:>02}] {title}...')
+                    
+                    self.ad.tap(pos)
                     sleep(1)
                     self._read_news(count, delay)
                     if count < ssc:
-                        self._star_share_comment(msg)
+                        self._star_share_comment(title)
 
                     # 时间到了，不读了
                     self.ad.back()
                     sleep(1)
                 logger.info(f'新闻：第 {count:>2} 则已阅，耗时 {round(t.elapsed,2):>05} 秒')
+                self.db.add_article(title)
                 if 0 == count:
                     break
             else:
-                self.ad.slide(complex(self.fixed.real, article[1].imag), self.fixed, duration=1000)
+                self.ad.slide(self.fixed_bottom, self.fixed_top, duration=1000)
                 sleep(3)
         sleep(5)
         

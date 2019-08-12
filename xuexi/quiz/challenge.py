@@ -60,7 +60,7 @@ class ChallengeQuiz(object):
                     res = json.load(fp)
                 except Exception:
                     logger.debug(f'加载JSON数据失败')
-                logger.debug(res)
+                # logger.debug(res)
             logger.debug(f'载入JSON数据{filename}')
             return res
         else:
@@ -147,7 +147,7 @@ class ChallengeQuiz(object):
             options = "\n".join([f'{chr(i+65)}. {x}' for i, x in enumerate(self.options.split(' '))])
             print(f'\n[挑战题] {self.content[:45]}...\n{options}')
             self.has_bank = True
-            logger.debug('bank from database')
+            # logger.debug('bank from database')
             cursor = ord(bank.answer) - 65
             logger.info(f'自动提交答案 {bank.answer}')
             sleep(delay_seconds) # 延时按钮

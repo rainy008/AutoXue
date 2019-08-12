@@ -160,7 +160,7 @@ class Adble(object):
         subprocess.check_call(f'adb shell am broadcast -a ADB_INPUT_TEXT --es msg {msg}', shell=True, stdout=subprocess.PIPE)
 
     def close(self):
-        self._setIME(self.ime)
+        # self._setIME(self.ime)
         if self.is_virtual:
             self._disconnect()
 

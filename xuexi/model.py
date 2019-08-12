@@ -8,7 +8,7 @@
 @time: 2019-08-01(星期四) 17:24
 @Copyright © 2019. All rights reserved.
 '''
-import os
+from pathlib import Path
 import re
 import json
 from sqlalchemy import Column,Integer, String, Text, Boolean, create_engine
@@ -24,7 +24,7 @@ Base = declarative_base()
 # 定义Bank对象:
 class Bank(Base):
     # 表的名字:
-    __tablename__ = 'Bank'
+    __tablename__ = 'banks'
 
     '''表的结构:
         id | catagory | content | options[item0, item1, item2, item3] | answer | note | bounds
@@ -95,6 +95,16 @@ class Bank(Base):
     def from_dict(cls, data):
         return cls(data['catagory'], data['content'], data['options'], data['answer'], data['note'], '')
 
+class Article(Base):
+    __tablename__ = 'articles'
+    id = Column(Integer,primary_key=True)
+    title = Column(Text, index=True, default='title')
+
+    def __repr__(self):
+        return f'{self.title}'
+
+    def __str__(self):
+        return f'[{self.id}] {self.title}'
 
 
 class Model():
@@ -126,6 +136,28 @@ class Model():
             self.session.commit()
             logger.info(f'数据库添加记录成功！')
 
+    def has_article(self, title):
+        return self.session.query(Article).filter_by(title=title).first() is not None
+
+    def print_arcitles(self):
+        items = self.session.query(Article).all()
+        for item in items:
+            print(item)
+
+    def len_articles(self):
+        return len(self.session.query(Article).all())
+    
+    def add_article(self, title):
+        if '' == title:
+            raise ValueError('文章标题不能为空')
+        if self.has_article(title):
+            raise RuntimeError('文章标题已在数据库中')
+        else:
+            article = Article(title=title)
+            self.session.add(article)
+            self.session.commit()
+            logger.info(f'数据库添加成功！ {title}')
+
     # def delete(self, item):
     #     '''数据库删除记录'''
     #     to_del = self.qeury(content=item.content)
@@ -150,21 +182,21 @@ class Model():
     #     else:
     #         logger.info('数据库无此纪录!')
 
-    def _to_json(self, filename, catagory='挑战题 单选题 多选题 填空题'):
-        datas = self.query(catagory)
+    def _to_json(self, path, catagory='挑战题 单选题 多选题 填空题'):
+        datas = self.query(catagory=catagory)
         # logger.debug(len(datas))
         output = [data.to_dict() for data in datas]
-        with open(filename,'w',encoding='utf-8') as fp:
+        with open(path,'w',encoding='utf-8') as fp:
             json.dump(output,fp,indent=4,ensure_ascii=False)
-        logger.info(f'JSON数据{len(datas)}条成功导出{filename}')
+        logger.info(f'JSON数据{len(datas)}条成功导出{path}')
         return True
 
 
 
 
-    def _from_json(self, filename, catagory='挑战题 单选题 多选题 填空题'):
-        if(os.path.exists(filename)):        
-            with open(filename,'r',encoding='utf-8') as fp:
+    def _from_json(self, path, catagory='挑战题 单选题 多选题 填空题'):
+        if path.exists():
+            with open(path,'r',encoding='utf-8') as fp:
                 res = json.load(fp)
             for r in res:
                 bank = Bank.from_dict(r)
@@ -172,41 +204,47 @@ class Model():
                     if str(len(bank.answer.split(' '))) != bank.options:
                         continue
                 self.add(bank)
-            logger.info(f'JSON数据成功导入{filename}')
+            logger.info(f'JSON数据成功导入{path}')
             return True
         else:
-            logger.debug(f'JSON数据{filename}不存在')
+            logger.debug(f'JSON数据{path}不存在')
             return False
     
-    def _to_md(self, filename, catagory='挑战题 单选题 多选题 填空题'):
-        pass
+    def _to_md(self, path, catagory='挑战题'):
+        items = db.query(catagory=catagory)
+        with open(path, 'w', encoding='utf-8') as fp:
+            fp.write(f'# 学习强国 挑战答题 题库 {len(items):>4} 题\n')
+            for item in items:
+                content = re.sub(r'\s\s+', '\_\_\__',re.sub(r'[\(（]出题单位.*', '', item.content))
+                options = "\n\n".join([f'+ **{x}**' if i==ord(item.answer)-65 else f'+ {x}' for i, x in enumerate(item.options.split(' '))])
+                fp.write(f'{item.id}. {content}  *{item.answer}*\n\n{options}\n\n')
+        return 0
 
-    def _to_xls(self, filename, catagory='挑战题 单选题 多选题 填空题'):
+
+
+    def _to_xls(self, path, catagory='挑战题 单选题 多选题 填空题'):
         from .common import xlser
         data = self.query(catagory=catagory)
-        xs = xlser.Xlser(filename)
+        xs = xlser.Xlser(path)
         xs.save(data)
 
-    def upload(self, filename, catagory='挑战题 单选题 多选题 填空题'):
-        filepath,fullflname = os.path.split(filename)
-        fname,ext = os.path.splitext(fullflname)
-        if '.json' == ext:
-            self._from_json(filename, catagory)
-        elif '.xls' == ext or '.xlsx' == ext:
+    def upload(self, path, catagory='挑战题 单选题 多选题 填空题'):
+        if '.json' == path.suffix:
+            self._from_json(path, catagory)
+        elif '.xls' == path.suffix or '.xlsx' == path.suffix:
             pass
         else:
             logger.info(f'不被支持的文件类型: {ext}')
 
     
-    def download(self, filename, catagory='挑战题 单选题 多选题 填空题'):
-        filepath,fullflname = os.path.split(filename)
-        fname,ext = os.path.splitext(fullflname)
+    def download(self, path, catagory='挑战题 单选题 多选题 填空题'):
+        ext = path.suffix
         if '.json' == ext:
-            self._to_json(filename, catagory)
+            self._to_json(path, catagory)
         elif '.xls' == ext or '.xlsx' == ext:
-            self._to_xls(filename, catagory)
+            self._to_xls(path, catagory)
         elif '.md' == ext:
-            self._to_md(filename, catagory)
+            self._to_md(path, catagory)
         else:
             logger.info(f'不被支持的文件类型: {ext}')
 
@@ -223,14 +261,17 @@ if __name__ == "__main__":
     parse.add_argument('-b', '--behavior', metavar='behavior', type=str, default='download', help='数据库操作，upload、download')
     parse.add_argument('-c', '--catagory', metavar='catagory', type=str, default='挑战题 单选题 多选题 填空题', help='题型：挑战题、单选题、多选题、填空题')
     parse.add_argument('-d', '--display', metavar='display', nargs='?', const=True, type=bool, default=False, help='打印')
+    parse.add_argument('-l', '--articles', metavar='articles', nargs='?', const=True, type=bool, default=False, help='打印已阅文章列表')
     args = parse.parse_args()
 
-    db = Model('sqlite:///./xuexi/src/database/data-dev.sqlite')
+    db = Model('sqlite:///./xuexi/data-dev.sqlite')
     if args.filename:
+        # print(f'选中题型：{args.catagory}')
+        path = Path(args.filename)
         if 'download' == args.behavior:
-            db.download(args.filename, args.catagory)
+            db.download(path, catagory=args.catagory)
         elif 'upload' == args.behavior:
-            db.upload(args.filename, args.catagory)
+            db.upload(path, catagory=args.catagory)
         else:
             pass
     else:
@@ -238,18 +279,15 @@ if __name__ == "__main__":
             data = db.query(catagory=args.catagory)
             for d in data:
                 print(d)
-            print(f'总数 {len(data)}题')
+            print(f'题目数 {len(data)}题')
+        elif args.articles:
+            db.print_arcitles()
         else:
-            print('''使用说明：
-    python -m xuexi.model filename -b [upload|download] -c [挑战题|填空题|单选题|多选题]
-    eg. 
-        python -m xuexi.model ./xuexi/src/json/daily.json -b upload
-        python -m xuexi.model ./xuexi/output.json
-''')
+            print('''使用说明：\n\tpython -m xuexi.model filename -b [upload|download] -c [挑战题|填空题|单选题|多选题]\n\teg.\n\t\tpython -m xuexi.common.model ./xuexi/src/json/daily.json -b upload\n\t\tpython -m xuexi.common.model ./xuexi/output.json\n''')
             data = db.query()
-            print(f'总数 {len(data)}题')
+            print(f'文章数 {db.len_articles():>4}篇\n题目数 {len(data):>4}题')
             for catagory in ['挑战题', '填空题', '单选题', '多选题']:
                 data = db.query(catagory=catagory)
-                print(f'{catagory} {len(data)}题')
+                print(f'{catagory} {len(data):>4}题')
 
 

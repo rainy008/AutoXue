@@ -1,4 +1,6 @@
-# 学习强国 AutoXue 2.2
+# 学习强国 AutoXue 2.3
+
+> **题库** [在线版](./xuexi/src/md/data-dev.md) | [下载版](./xuexi/src/xls/data-dev.xlsx)
 
 > 项目更名 AutoXue： 支持阅读文章、视听学习、每日答题、挑战答题，自由配置积分或积点点通，阅读文章支持收藏、分享、评论，每日可积分41分
 
@@ -10,7 +12,7 @@ $:git clone https://github.com/kessil/AutoXue.git --depth=1
 * os：推荐Win10
 * Python：python 3.6+ 推荐[python 3.7.4](http://www.python.org/)
 * ADB：ADB1.0.39+ 推荐[ADB 1.0.40](./xuexi/src/assets/ADB_1_0_40.7z)
-* device：Android 推荐[MuMu模拟器](http://mumu.163.com/)2.2.12
+* device：Android 推荐[MuMu模拟器](http://mumu.163.com/)
 
 ## 使用方法
 0. 很重要！首先请确认自己的操作系统，XP系统只能安装python3.4-，请不要往下看了，项目要求python版本最低3.6，因为python3.6+加入了本项目使用的f-string特性，另、操作系统太低可能无法安装使用模拟器，所以，系统不符合的用户真心不要浪费时间往下看了
@@ -25,7 +27,7 @@ python -m venv venv
 (venv)$:python -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 4. 打开MuMu模拟器（连接安卓手机需要开启USB调试），登录学习强国APP并置于首页
-> 经测试，华为手机【我要答题】在一个容器中，无法获取布局，其他手机未测试。大家还是踏踏实实用模拟器吧，别再提无理要求了。
+> 经测试，华为手机时有发生无法获取布局情况导致异常中断，其他手机未测试。强烈建议在模拟器中食用。作者不会考虑特别为某台设备做适配。
 
 5. 确认配置，default.ini勿修改，在custom.ini中修改配置，积分为主或是需要积点点通的做相应配置即可
 
@@ -79,5 +81,3 @@ python -m venv venv
         (venv)$:python -m xuexi.media.reader -c 20 -d 30 # 手机中使用 
 '''
 ```
-## TODO
-建立article、video清单，防止重复刷到影响积分，修复视频上拉进入下一条失败

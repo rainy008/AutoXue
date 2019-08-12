@@ -55,7 +55,7 @@ class Viewer:
     def next(self):
         '''下一条，上划'''
         logger.debug(f'下一条')
-        self.ad.draw('up')
+        self.ad.draw('up', 200)
        
 
     def exit(self):

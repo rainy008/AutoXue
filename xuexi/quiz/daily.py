@@ -203,7 +203,7 @@ class DailyQuiz(object):
                     res = json.load(fp)
                 except Exception:
                     logger.debug(f'加载JSON数据失败')
-                logger.debug(res)
+                # logger.debug(res)
             logger.debug(f'载入JSON数据{filename}')
             return res
         else:
