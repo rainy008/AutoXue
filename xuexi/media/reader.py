@@ -113,47 +113,48 @@ class Reader:
 
     def _star_share_comment(self, title):
         self._fresh()
-        pos_star = self.xm.pos(cfg.get(self.rules, 'rule_star_bounds'))
-        pos_share = self.xm.pos(cfg.get(self.rules, 'rule_share_bounds'))
         pos_comment = self.xm.pos(cfg.get(self.rules, 'rule_comment_bounds'))
+        if pos_comment:
+            pos_star = self.xm.pos(cfg.get(self.rules, 'rule_star_bounds'))
+            pos_share = self.xm.pos(cfg.get(self.rules, 'rule_share_bounds'))
+            
 
-        # 分享
-        self.ad.tap(pos_share)
-        sleep(1)
-        self.ad.uiautomator(filesize=6000)
-        self.xm.load()
-        pos_share2xuexi = self.xm.pos(cfg.get(self.rules, 'rule_share2xuexi_bounds'))
-        self.ad.tap(pos_share2xuexi)
-        # logger.debug(f'分享一篇文章')
-        logger.info(f'分享一篇文章!')
-        sleep(1)
-        self.ad.back()
-        sleep(1)
+            # 分享
+            self.ad.tap(pos_share)
+            sleep(1)
+            self.ad.uiautomator(filesize=6000)
+            self.xm.load()
+            pos_share2xuexi = self.xm.pos(cfg.get(self.rules, 'rule_share2xuexi_bounds'))
+            self.ad.tap(pos_share2xuexi)
+            # logger.debug(f'分享一篇文章')
+            logger.info(f'分享一篇文章!')
+            sleep(1)
+            self.ad.back()
+            sleep(1)
 
-        # 随机取一条留言
-        keywords = self.json_comments.keys()
-        for keyword in keywords:
-            if keyword in title:
-                msg = choice(self.json_comments[keyword]) or f'{title} 不忘初心牢记使命！为实现中华民族伟大复兴的中国梦不懈奋斗！'
-                break
-        else:
-            # 没有一个关键词匹配，双随机：随机关键词中的随机评论
-            msg = choice(self.json_comments[choice(list(keywords))]) or f'{title} 不忘初心牢记使命！为实现中华民族伟大复兴的中国梦不懈奋斗！'
-       
-        # 留言
-        self.ad.tap(pos_comment)
-        sleep(1)
+            # 随机取一条留言
+            keywords = self.json_comments.keys()
+            for keyword in keywords:
+                if keyword in title:
+                    msg = choice(self.json_comments[keyword]) or f'{title} 不忘初心牢记使命！为实现中华民族伟大复兴的中国梦不懈奋斗！'
+                    break
+            else:
+                # 没有一个关键词匹配，双随机：随机关键词中的随机评论
+                msg = choice(self.json_comments[choice(list(keywords))]) or f'{title} 不忘初心牢记使命！为实现中华民族伟大复兴的中国梦不懈奋斗！'
         
-        self.ad.input(msg)
-        logger.info(f'留言一篇文章: {msg}')        
-        sleep(3)
-        self.ad.uiautomator(filesize=2000)
-        self.xm.load()
-        pos_publish = self.xm.pos(cfg.get(self.rules, 'rule_publish_bounds'))
-        self.ad.tap(pos_publish)
-        sleep(1)
-        # 坑爹的输入法栏，害我要再来一遍
-        while True:
+            # 留言
+            self.ad.tap(pos_comment)
+            sleep(1)
+            self.ad.input(msg)
+            logger.info(f'留言一篇文章: {msg}')        
+            sleep(3)
+            self.ad.uiautomator(filesize=2000)
+            self.xm.load()
+            pos_publish = self.xm.pos(cfg.get(self.rules, 'rule_publish_bounds'))
+            self.ad.tap(pos_publish)
+            sleep(1)
+            
+            # 坑爹的输入法栏，害我要再来一遍
             self.ad.uiautomator(filesize=2000)
             self.xm.load()
             pos_publish2 = self.xm.pos(cfg.get(self.rules, 'rule_publish_bounds'))
@@ -163,16 +164,22 @@ class Reader:
                 logger.debug(f'发布按钮偏移量 {offset} 屏幕大小 {self.ad.wmsize}')
                 self.ad.tap(pos_publish-complex(f'{offset}j')) # 由于下面有一栏输入法提示，导致这里pos或出现offset位置偏差，多点一次
             else:
-                logger.debug('# 点着了，不用点了')
-                break
-                
-        sleep(1)
+                logger.debug('# 点着了，不用点了')                
+            sleep(1)
 
-        # 收藏
-        self.ad.tap(pos_star)
-        # logger.debug(f'收藏一篇文章 {pos_star}')
-        logger.info(f'收藏一篇文章!')
-        sleep(1) 
+            # 收藏
+            self.ad.tap(pos_star)
+            # logger.debug(f'收藏一篇文章 {pos_star}')
+            logger.info(f'收藏一篇文章!')
+            sleep(1) 
+            
+            return 1
+        else:
+            logger.debug(f'这是一篇关闭评论的文章，老子不留言了，告辞！')
+            return 0
+        
+
+
 
 
     def collect_comments(self, tag='default'):
@@ -235,8 +242,8 @@ class Reader:
                     self.ad.tap(pos)
                     sleep(1)
                     self._read_news(count, delay)
-                    if count < ssc:
-                        self._star_share_comment(title)
+                    if ssc > 0:
+                        ssc -= self._star_share_comment(title)
 
                     # 时间到了，不读了
                     self.ad.back()

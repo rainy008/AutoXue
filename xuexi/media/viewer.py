@@ -44,8 +44,14 @@ class Viewer:
         self.ad.tap(self.ding)
         self._fresh()
         suggest = self.xm.pos(cfg.get(self.rules, 'rule_suggest'))
-        logger.debug(f'百灵 推荐：{suggest}')
-        self.ad.tap(suggest) # 点击刷新
+        try:
+            logger.debug(f'百灵 推荐：{suggest}')
+            self.ad.tap(suggest) # 点击推荐刷新
+        except Exception as e:
+            logger.debug(f'百灵 推荐 不知道为什么找不到了 摊手')
+            logger.debug(e)
+        finally:
+            self.ad.tap(self.ding) # 再点一次百灵刷新
         sleep(3)
         self._fresh()
         first = self.xm.pos(cfg.get(self.rules, 'rule_first_video'))
@@ -72,14 +78,15 @@ class Viewer:
     def run(self, count=36, delay=30):
         '''运行脚本，count刷视频数，delay每个视频观看时间'''
         self.enter()
-        while count:  
-            with timer.Timer() as t:          
-                count -= 1
-                # logger.info(f'正在视听学习 第 {count+1:2} 条，还剩 {count:2} 条，{delay:2} 秒后进入下一条...')
-                logger.debug(f'观看{delay}秒中...')            
-                sleep(delay)
-                self.next()
-            logger.info(f'视听学习第 {count} 则，耗时 {round(t.elapsed, 2):<05} 秒')
+        # while count:  
+        #     with timer.Timer() as t:          
+        #         count -= 1
+        #         # logger.info(f'正在视听学习 第 {count+1:2} 条，还剩 {count:2} 条，{delay:2} 秒后进入下一条...')
+        #         logger.debug(f'观看{delay}秒中...')            
+        #         sleep(delay)
+        #         self.next()
+        #     logger.info(f'视听学习第 {count} 则，耗时 {round(t.elapsed, 2):<05} 秒')
+        sleep(1200)
         self.exit()
         logger.info(f'视听学习完成，返回首页')
 

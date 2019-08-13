@@ -1,15 +1,15 @@
 # 学习强国 AutoXue 2.3
 
-> **题库** [在线版](./xuexi/src/md/data-dev.md) | [下载版](./xuexi/src/xls/data-dev.xlsx)
+> **挑战答题 题库** [在线版1](./xuexi/src/md/data-dev.md) | [在线版2](./xuexi/src/md/data-grid.md) | [下载版](./xuexi/src/xls/data-dev.xlsx)
 
-> 项目更名 AutoXue： 支持阅读文章、视听学习、每日答题、挑战答题，自由配置积分或积点点通，阅读文章支持收藏、分享、评论，每日可积分41分
+> 项目更名 AutoXue： 支持阅读文章、视听学习、每日答题、挑战答题，自由配置积分或积点点通，阅读文章支持收藏、分享、评论（支援评论列表整理请看[这里](./xuexi/src/json/comments.json)），每日可积分41分、积点点通33分
 
 > 使用本项目直接下载zip 或者
 ```bash
 $:git clone https://github.com/kessil/AutoXue.git --depth=1
 ```
 ## 环境要求
-* os：推荐Win10
+* os：Win10+
 * Python：python 3.6+ 推荐[python 3.7.4](http://www.python.org/)
 * ADB：ADB1.0.39+ 推荐[ADB 1.0.40](./xuexi/src/assets/ADB_1_0_40.7z)
 * device：Android 推荐[MuMu模拟器](http://mumu.163.com/)
@@ -29,7 +29,10 @@ python -m venv venv
 4. 打开MuMu模拟器（连接安卓手机需要开启USB调试），登录学习强国APP并置于首页
 > 经测试，华为手机时有发生无法获取布局情况导致异常中断，其他手机未测试。强烈建议在模拟器中食用。作者不会考虑特别为某台设备做适配。
 
-5. 确认配置，default.ini勿修改，在custom.ini中修改配置，积分为主或是需要积点点通的做相应配置即可
+5. 确认配置，[config-default.ini](./xuexi/config-default.ini)勿修改，在[config-custom.ini](./xuexi/config-custom.ini)中修改配置，积分为主或是需要积点点通的做相应配置即可
+> 修改方法： 从[config-default.ini](./xuexi/config-default.ini)复制需要改动的[section]和[option]到[config-custom.ini](./xuexi/config-custom.ini),注意，每条配置必须在其section下
+>> 如要修改模拟器连接端口，只要在[config-custom.ini](./xuexi/config-custom.ini)中[mumu]下追加port=5555
+
 
 | 配置值          | 积分 | 积点点通 | 备注           |
 | ------------------ | :----: | :--------: | ---------------- |
