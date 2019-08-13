@@ -1,6 +1,6 @@
 # 学习强国 AutoXue 2.3
 
-> **挑战答题 题库** [在线版1](./xuexi/src/md/data-dev.md) | [在线版2](./xuexi/src/md/data-grid.md) | [下载版](./xuexi/src/xls/data-dev.xlsx)
+> **挑战答题 题库** [在线版1](./xuexi/src/md/data-doc.md) | [在线版2](./xuexi/src/md/data-grid.md) | [下载版](./xuexi/src/xls/data-dev.xlsx)
 
 > 项目更名 AutoXue： 支持阅读文章、视听学习、每日答题、挑战答题，自由配置积分或积点点通，阅读文章支持收藏、分享、评论（支援评论列表整理请看[这里](./xuexi/src/json/comments.json)），每日可积分41分、积点点通33分
 
