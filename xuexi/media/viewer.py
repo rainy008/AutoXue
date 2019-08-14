@@ -75,18 +75,19 @@ class Viewer:
         logger.debug(f'点击HOME {self.home}')
         sleep(5)
 
-    def run(self, count=36, delay=30):
+    def run(self, count=35, delay=45):
         '''运行脚本，count刷视频数，delay每个视频观看时间'''
         self.enter()
-        # while count:  
-        #     with timer.Timer() as t:          
-        #         count -= 1
-        #         # logger.info(f'正在视听学习 第 {count+1:2} 条，还剩 {count:2} 条，{delay:2} 秒后进入下一条...')
-        #         logger.debug(f'观看{delay}秒中...')            
-        #         sleep(delay)
-        #         self.next()
-        #     logger.info(f'视听学习第 {count} 则，耗时 {round(t.elapsed, 2):<05} 秒')
-        sleep(1200)
+        while count:  
+            with timer.Timer() as t:          
+                count -= 1
+                sleep(5)
+                # logger.info(f'正在视听学习 第 {count+1:2} 条，还剩 {count:2} 条，{delay:2} 秒后进入下一条...')
+                logger.debug(f'观看{delay}秒中...')            
+                sleep(delay)
+                self.next()
+            logger.info(f'视听学习第 {count} 则，耗时 {round(t.elapsed, 2):<05} 秒')
+        # sleep(1200)
         self.exit()
         logger.info(f'视听学习完成，返回首页')
 

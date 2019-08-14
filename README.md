@@ -2,7 +2,7 @@
 
 > **挑战答题 题库** [在线版1](./xuexi/src/md/data-doc.md) | [在线版2](./xuexi/src/md/data-grid.md) | [下载版](./xuexi/src/xls/data-dev.xlsx)
 
-> 项目更名 AutoXue： 支持阅读文章、视听学习、每日答题、挑战答题，自由配置积分或积点点通，阅读文章支持收藏、分享、评论（支援评论列表整理请看[这里](./xuexi/src/json/comments.json)），每日可积分41分、积点点通33分
+> 项目更名 AutoXue： 支持阅读文章、视听学习、每日答题、挑战答题，自由配置积分或积点点通，阅读文章支持收藏、分享、评论（支援评论列表整理请看[这里](./xuexi/src/json/comments.json)），每日可积分41分、积点点通33点
 
 > 使用本项目直接下载zip 或者
 ```bash
@@ -16,7 +16,7 @@ $:git clone https://github.com/kessil/AutoXue.git --depth=1
 
 ## 使用方法
 0. 很重要！首先请确认自己的操作系统，XP系统只能安装python3.4-，请不要往下看了，项目要求python版本最低3.6，因为python3.6+加入了本项目使用的f-string特性，另、操作系统太低可能无法安装使用模拟器，所以，系统不符合的用户真心不要浪费时间往下看了
-1. 安装好Python、ADB、MuMu模拟器，并添加python和ADB环境变量
+1. 安装好Python、ADB、MuMu模拟器，并**添加python和ADB环境变量**
 2. 安装[ADBkeyboard](./xuexi/src/assets/ADBKeyboard.apk)输入法（解决输入中文）
 3. 安装[学习强国](https://www.xuexi.cn/)APP，测试版本为2.5.0
 4. 双击运行初次安装.bat， 或者
@@ -37,7 +37,7 @@ python -m venv venv
 | 配置值          | 积分 | 积点点通 | 备注           |
 | ------------------ | :----: | :--------: | ---------------- |
 | daily_round        | 3~6   | 3~6       | 每组都对积2分否则积1分上限6分 |
-| challenge_count    | 10+  | 30+      | 答对5题积2分上限6分 |
+| challenge_count    | 10+  | 30+      | 答对5题积3分上限6分 |
 | video_count        | 6+   | 20+      | 要求6则，每则1分上限6分      |
 | video_delay        | 180+ | 54+      | 总时长要求18分钟，每3分钟积1分上限6分 |
 | article_count      | 6+   | 20+      | 要求6篇，每篇1分上限6分      |
