@@ -191,9 +191,6 @@ class Model():
         logger.info(f'JSON数据{len(datas)}条成功导出{path}')
         return True
 
-
-
-
     def _from_json(self, path, catagory='挑战题 单选题 多选题 填空题'):
         if path.exists():
             with open(path,'r',encoding='utf-8') as fp:
@@ -229,8 +226,6 @@ class Model():
             
         return 0
 
-
-
     def _to_xls(self, path, catagory='挑战题 单选题 多选题 填空题'):
         from .common import xlser
         data = self.query(catagory=catagory)
@@ -240,17 +235,14 @@ class Model():
     def upload(self, path, catagory='挑战题 单选题 多选题 填空题'):
         if '.json' == path.suffix:
             self._from_json(path, catagory)
-        elif '.xls' == path.suffix or '.xlsx' == path.suffix:
-            pass
-        else:
-            logger.info(f'不被支持的文件类型: {ext}')
-
+        elif path.suffix not in ('.xls', '.xlsx'):
+            logger.info(f'不被支持的文件类型: {path.suffix}')
     
     def download(self, path, catagory='挑战题 单选题 多选题 填空题'):
         ext = path.suffix
         if '.json' == ext:
             self._to_json(path, catagory)
-        elif '.xls' == ext or '.xlsx' == ext:
+        elif ext in ('.xls', '.xlsx'):
             self._to_xls(path, catagory)
         elif '.md' == ext:
             self._to_md(path, catagory)
