@@ -60,10 +60,8 @@ class Xmler(object):
         logger.debug(res)
         return res
 
-    def options(self, rule:str)->str:
-        res = [re.sub(r'\s+', '、', x) for x in self.root.xpath(rule)]
-        logger.debug(res)
-        res = ' '.join(res)
+    def options(self, rule:str)->list:
+        res = [re.sub(r'\|', '_', x) for x in self.root.xpath(rule)]
         logger.debug(res)
         return res
 

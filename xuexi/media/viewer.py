@@ -41,14 +41,18 @@ class Viewer:
         logger.debug(f'HOME: {self.home}')
         self.ding = self.xm.pos(cfg.get(self.rules, 'rule_bottom_ding'))
         logger.debug(f'DING: {self.ding}')
-        self.ad.tap(self.ding)
-        self._fresh()
-        suggest = self.xm.pos(cfg.get(self.rules, 'rule_suggest'))
         try:
-            logger.debug(f'百灵 推荐：{suggest}')
-            self.ad.tap(suggest) # 点击推荐刷新
+            self.ad.tap(self.ding)
         except Exception as e:
-            logger.debug(f'百灵 推荐 不知道为什么找不到了 摊手')
+            raise AttributeError(f'没有找到 百灵 的点击坐标')
+        self._fresh()
+        video_column = cfg.get('common', 'video_column_name')
+        pos_col = self.xm.pos(f'//node[@text="{video_column}"]/@bounds')
+        try:
+            self.ad.tap(pos_col) # 点击{video_column}刷新
+            logger.debug(f'百灵 {video_column}：{pos_col}')
+        except Exception as e:
+            logger.debug(f'百灵 {video_column} 不知道为什么找不到了 摊手')
             logger.debug(e)
         finally:
             self.ad.tap(self.ding) # 再点一次百灵刷新
@@ -78,7 +82,7 @@ class Viewer:
     def run(self, count=35, delay=45):
         '''运行脚本，count刷视频数，delay每个视频观看时间'''
         self.enter()
-        while count:  
+        while count:
             with timer.Timer() as t:          
                 count -= 1
                 sleep(5)

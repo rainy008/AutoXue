@@ -67,14 +67,15 @@ class Bank(Base):
     
     @classmethod
     def from_challenge(cls, content, options='', answer='', note='', bounds=''):
-        return cls(catagory='挑战题', content=content, options=options, answer=answer, note=note, bounds=bounds)
+        str_options = '|'.join(options)
+        return cls(catagory='挑战题', content=content, options=str_options, answer=answer, note=note, bounds=bounds)
 
     @classmethod
     def from_daily(cls, catagory, content, options, answer, note):
         return cls(catagory=catagory, content=content, options=options, answer=answer, note=note, bounds='')
 
     def to_array(self):
-        options = self.options.split(' ')
+        options = self.options.split('|')
         array_bank = [self.id, self.answer, self.content]
         array_bank.extend(options)
         # array_bank.append(self.note)
@@ -93,7 +94,7 @@ class Bank(Base):
 
     @classmethod
     def from_dict(cls, data):
-        return cls(data['catagory'], data['content'], data['options'], data['answer'], data['note'], '')
+        return cls(data['catagory'], data['content'], re.sub(r'\s', '|', re.sub(r'|', '', data['options'])), data['answer'], data['note'], '')
 
 class Article(Base):
     __tablename__ = 'articles'
@@ -213,7 +214,7 @@ class Model():
             fp.write(f'# 学习强国 挑战答题 题库 {len(items):>4} 题\n')
             for item in items:
                 content = re.sub(r'\s\s+', '\_\_\_\_',re.sub(r'[\(（]出题单位.*', '', item.content))
-                options = "\n\n".join([f'+ **{x}**' if i==ord(item.answer)-65 else f'+ {x}' for i, x in enumerate(item.options.split(' '))])
+                options = "\n\n".join([f'+ **{x}**' if i==ord(item.answer)-65 else f'+ {x}' for i, x in enumerate(item.options.split('|'))])
                 fp.write(f'{item.id}. {content}  *{item.answer}*\n\n{options}\n\n')
         with open(path.with_name('data-grid.md'), 'w', encoding='utf-8') as fp2:
             fp2.write(f'# 学习强国 挑战答题 题库 {len(items):>4} 题\n')
@@ -221,7 +222,7 @@ class Model():
             fp2.write(f'|:--:|:--:|--------|----|----|----|----|\n')
             for item in items:
                 content = re.sub(r'\s\s+', '\_\_\_\_',re.sub(r'[\(（]出题单位.*', '', item.content))
-                options = " | ".join([f'**{x}**' if i==ord(item.answer)-65 else f'{x}' for i, x in enumerate(item.options.split(' '))])
+                options = " | ".join([f'**{x}**' if i==ord(item.answer)-65 else f'{x}' for i, x in enumerate(item.options.split('|'))])
                 fp2.write(f'| {item.id} | {item.answer} | {content} | {options} |\n')
             
         return 0

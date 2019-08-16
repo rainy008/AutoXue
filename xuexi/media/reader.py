@@ -38,6 +38,7 @@ class Reader:
         self.ad = ad
         self.xm = xm
         self.db = Model(cfg.get('common', 'database_article'))
+        self.enable_add_article = cfg.getboolean('common', 'enable_article_list')
 
         self.home = 0j
         self.feeds = 0j
@@ -85,7 +86,7 @@ class Reader:
             columns = [(t, p) for t, p in zip(self.xm.texts(cfg.get(self.rules, 'rule_columns_content')), self.xm.pos(cfg.get(self.rules, 'rule_columns_bounds')))]
             p0, p1 = columns[0][1], columns[-1][1]
             for col in columns:
-                if '订阅' == col[0]:
+                if cfg.get('common', 'article_column_name') == col[0]:
                     self.feeds = col[1]
                     break
             else:
@@ -133,14 +134,21 @@ class Reader:
             sleep(1)
 
             # 随机取一条留言
-            keywords = self.json_comments.keys()
-            for keyword in keywords:
-                if keyword in title:
-                    msg = choice(self.json_comments[keyword]) or f'{title} 不忘初心牢记使命！为实现中华民族伟大复兴的中国梦不懈奋斗！'
+            has_comment = False
+            for comment in self.json_comments:
+                for tag in comment["tags"]:
+                    if tag in title:
+                        msg = choice(comment["content"]) or f'{title} 不忘初心牢记使命！为实现中华民族伟大复兴的中国梦不懈奋斗！'
+                        has_comment = True
+                        break
+                    else:
+                        continue
+                if has_comment:
                     break
             else:
                 # 没有一个关键词匹配，双随机：随机关键词中的随机评论
-                msg = choice(self.json_comments[choice(list(keywords))]) or f'{title} 不忘初心牢记使命！为实现中华民族伟大复兴的中国梦不懈奋斗！'
+                comment = self.json_comments[0]
+                msg = choice(comment["content"]) or f'{title} 不忘初心牢记使命！为实现中华民族伟大复兴的中国梦不懈奋斗！'
         
             # 留言
             self.ad.tap(pos_comment)
@@ -220,7 +228,9 @@ class Reader:
     def run(self, count=25, delay=30, ssc=2):
         self.enter()    
         logger.info(f'新闻学习中...')
-        self.fixed_top = self.xm.pos(cfg.get(self.rules, 'rule_fixed_top_bounds'))        
+        self.fixed_top = self.xm.pos(cfg.get(self.rules, 'rule_fixed_top_bounds'))     
+        if not self.fixed_top:
+            raise RuntimeError(f'没有获取到任何新闻，请反省自己是不是没有订阅任何一个公众号！')   
         while count>0:
             self._fresh()
             pos_bottom = self.xm.pos(cfg.get(self.rules, 'rule_fixed_bottom_bounds'))
@@ -249,7 +259,8 @@ class Reader:
                     self.ad.back()
                     sleep(1)
                 logger.info(f'新闻：第 {count:>2} 则已阅，耗时 {round(t.elapsed,2):>05} 秒')
-                self.db.add_article(title)
+                if self.enable_add_article:
+                    self.db.add_article(title)
                 if 0 == count:
                     break
             else:

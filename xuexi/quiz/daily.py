@@ -175,7 +175,7 @@ class DailyQuiz(object):
                                     options=self.options, 
                                     answer=self.answer, 
                                     note=self.note)
-            logger.debug(str(bank))
+            # logger.debug(str(bank))
             if self.catagory in "填空题单选题多选题":
                 logger.info(f'正确答案: {self.answer}')
                 if '填空题' == self.catagory and 1 < self.count_blank:
@@ -225,10 +225,12 @@ class DailyQuiz(object):
         self._fresh()
         return self.xm.content(cfg.get(self.rules, 'rule_type'))
 
-    def _score(self):
-        res = self.xm.content(cfg.get(self.rules, 'rule_score'))
+    def _score_reached(self):
+        sleep(3)
+        self._fresh()
+        res = self.xm.content(cfg.get(self.rules, 'rule_score_reached'))
         logger.debug(res)
-        return int(res[1:])
+        return '领取奖励已达今日上限' == res
 
     def _dispatch(self):
         self.has_bank = False
@@ -256,22 +258,26 @@ class DailyQuiz(object):
             self._submit()  # 点击下一题或者完成
     
 
-    def run(self, group=6, count=5):
+    def run(self):
+        count = 5
         self._enter()
         # 每次回答5题，每日答题6组
-        while group:
-            logger.info(f'\n<----正在答题,还剩 {group} 组---->')
-            group = group -1
+        group = 0
+        while True:
+            print(f'\n<----正在答题,第 {group} 组---->')
             for j in range(count):
                 self._dispatch()
-                sleep(1)
-            if group > 0:
-                sleep(10) # 平台奇葩要求，10秒内仅可答题一次
-                self._fresh()
+            self._dump()
+            if self._score_reached() and not cfg.getboolean('common', 'daily_forver'):
+                logger.debug(f'分数已达标')
+                break
+            else:
+                logger.debug(f'分数未达标, 再来一组')
+                sleep(cfg.getint('common', 'daily_delay'))
                 self._next()
-        self._fresh()
-        self._return()
-        self._dump()
+                group += 1
+        logger.debug(f'大战{group}回合，终于分数达标咯，告辞！')
+        self.ad.back()
         return True
 
     def weekly(self, count=5):
@@ -288,7 +294,7 @@ if __name__ == "__main__":
     from ..common import adble, xmler
     logger.debug('running daily.py')
     parse = ArgumentParser()
-    parse.add_argument('-c', '--count', metavar='count', type=int, default=1, help='每日答题组数')
+    # parse.add_argument('-c', '--count', metavar='count', type=int, default=1, help='每日答题组数')
     parse.add_argument('-v', '--virtual', metavar='virtual', nargs='?', const=True, type=bool, default=False, help='是否模拟器')
 
     args = parse.parse_args()
@@ -296,7 +302,7 @@ if __name__ == "__main__":
     ad = adble.Adble(path, args.virtual)
     xm = xmler.Xmler(path)
     cg = DailyQuiz('mumu', ad, xm)
-    cg.run(args.count)
+    cg.run()
 
     # 每周答题，请先注释上一行,取消注释下一行，页面置于每周答题第一题，运行python -m xuexi.quiz.daily -v
     # cg.weekly() 
