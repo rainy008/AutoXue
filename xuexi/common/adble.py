@@ -34,14 +34,13 @@ class Adble(object):
             self._setIME('com.android.adbkeyboard/.AdbIME')
         else:
             logger.debug(f'未连接设备')
+            raise RuntimeError(f'未连接任何设备')
 
     def _connect(self):
         '''连接模拟器adb connect host:port'''
         logger.debug(f'正在连接模拟器{self.host}:{self.port}')
-        if 0 == subprocess.check_call(f'adb connect {self.host}:{self.port}', shell=True, stdout=subprocess.PIPE):
-            logger.info(f'连接模拟器{self.host}:{self.port} 成功')
-        else:
-            logger.info(f'断开模拟器{self.host}:{self.port} 失败')
+        subprocess.check_call(f'adb connect {self.host}:{self.port}', shell=True, stdout=subprocess.PIPE)
+
         
     def _disconnect(self):
         '''连接模拟器adb connect host:port'''

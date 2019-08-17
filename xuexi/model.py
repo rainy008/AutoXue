@@ -122,9 +122,10 @@ class Model():
         '''数据库检索记录'''
         catagory = catagory.split(' ')
         if id and isinstance(id, int):
-            return self.session.query(Bank).filter_by(id=id).first()
+            return self.session.query(Bank).filter_by(id=id).one_or_none()
         if content and isinstance(content, str):
-            return self.session.query(Bank).filter(Bank.catagory.in_(catagory)).filter_by(content=content).first()
+            content = re.sub(r'\s+', '%', content)
+            return self.session.query(Bank).filter(Bank.catagory.in_(catagory)).filter(Bank.content.like(content)).one_or_none()
         return self.session.query(Bank).filter(Bank.catagory.in_(catagory)).all()
 
     def add(self, item):
@@ -138,7 +139,7 @@ class Model():
             logger.info(f'数据库添加记录成功！')
 
     def has_article(self, title):
-        return self.session.query(Article).filter_by(title=title).first() is not None
+        return self.session.query(Article).filter_by(title=title).one_or_none() is not None
 
     def print_arcitles(self):
         items = self.session.query(Article).all()

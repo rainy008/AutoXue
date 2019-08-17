@@ -16,12 +16,6 @@ from .. import logger, cfg
 from ..model import Model
 from ..common import timer
 
-offset_dict = {
-    864: '17',
-    1024: '23',
-    2240: '35'
-}
-
 class Reader:
     '''设计思路：
         0. 前提，APP位于首页
@@ -168,7 +162,7 @@ class Reader:
             pos_publish2 = self.xm.pos(cfg.get(self.rules, 'rule_publish_bounds'))
             if pos_publish2 == pos_publish:
                 logger.debug(f'# {pos_publish}没点着，按偏移量再点一次')
-                offset = offset_dict[max(self.ad.wmsize)]
+                offset = cfg.getint('resolution', f'{max(self.ad.wmsize)}')
                 logger.debug(f'发布按钮偏移量 {offset} 屏幕大小 {self.ad.wmsize}')
                 self.ad.tap(pos_publish-complex(f'{offset}j')) # 由于下面有一栏输入法提示，导致这里pos或出现offset位置偏差，多点一次
             else:
