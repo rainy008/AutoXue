@@ -41,11 +41,21 @@ class Viewer:
         logger.debug(f'HOME: {self.home}')
         self.ding = self.xm.pos(cfg.get(self.rules, 'rule_bottom_ding'))
         logger.debug(f'DING: {self.ding}')
-        self.ad.tap(self.ding)
+        try:
+            self.ad.tap(self.ding)
+        except Exception as e:
+            raise AttributeError(f'没有找到 百灵 的点击坐标')
         self._fresh()
-        suggest = self.xm.pos(cfg.get(self.rules, 'rule_suggest'))
-        logger.debug(f'百灵 推荐：{suggest}')
-        self.ad.tap(suggest) # 点击刷新
+        video_column = cfg.get('common', 'video_column_name')
+        pos_col = self.xm.pos(f'//node[@text="{video_column}"]/@bounds')
+        try:
+            self.ad.tap(pos_col) # 点击{video_column}刷新
+            logger.debug(f'百灵 {video_column}：{pos_col}')
+        except Exception as e:
+            logger.debug(f'百灵 {video_column} 不知道为什么找不到了 摊手')
+            logger.debug(e)
+        finally:
+            self.ad.tap(self.ding) # 再点一次百灵刷新
         sleep(3)
         self._fresh()
         first = self.xm.pos(cfg.get(self.rules, 'rule_first_video'))
@@ -55,7 +65,7 @@ class Viewer:
     def next(self):
         '''下一条，上划'''
         logger.debug(f'下一条')
-        self.ad.draw('up')
+        self.ad.draw('up', 200)
        
 
     def exit(self):
@@ -69,17 +79,19 @@ class Viewer:
         logger.debug(f'点击HOME {self.home}')
         sleep(5)
 
-    def run(self, count=36, delay=30):
+    def run(self, count=35, delay=45):
         '''运行脚本，count刷视频数，delay每个视频观看时间'''
         self.enter()
-        while count:  
+        while count:
             with timer.Timer() as t:          
                 count -= 1
+                sleep(5)
                 # logger.info(f'正在视听学习 第 {count+1:2} 条，还剩 {count:2} 条，{delay:2} 秒后进入下一条...')
                 logger.debug(f'观看{delay}秒中...')            
                 sleep(delay)
                 self.next()
             logger.info(f'视听学习第 {count} 则，耗时 {round(t.elapsed, 2):<05} 秒')
+        # sleep(1200)
         self.exit()
         logger.info(f'视听学习完成，返回首页')
 
@@ -99,3 +111,5 @@ if __name__ == "__main__":
     xm = xmler.Xmler(path)
     cg = Viewer('mumu', ad, xm)
     cg.run(args.count, args.delay)
+
+    ad.close()

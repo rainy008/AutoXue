@@ -33,9 +33,9 @@ class Quiz(object):
     def _run_daily(self):
 
         dq = DailyQuiz(self.rules, self.ad, self.xm)
-        round = cfg.getint('common', 'daily_round')
-        count = cfg.getint('common', 'daily_count')
-        dq.run(round, count)
+        # score = cfg.getint('common', 'daily_score')
+        # count = 5 # cfg.getint('common', 'daily_count')
+        dq.run()
         logger.info('完成每日答题，请稍候片刻...')
         # sleep(5)
 

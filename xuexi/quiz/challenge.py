@@ -29,7 +29,7 @@ class ChallengeQuiz(object):
         self.db = Model(cfg.get('common', 'database_challenge'))
         self.has_bank = False
         self.is_user = cfg.getboolean('common', 'is_user')
-        self.json_blank = self._load()
+        # self.json_blank = self._load()
         self.content = ''
         self.options = ''
         self.note = ''
@@ -60,7 +60,7 @@ class ChallengeQuiz(object):
                     res = json.load(fp)
                 except Exception:
                     logger.debug(f'加载JSON数据失败')
-                logger.debug(res)
+                # logger.debug(res)
             logger.debug(f'载入JSON数据{filename}')
             return res
         else:
@@ -88,7 +88,7 @@ class ChallengeQuiz(object):
         }
         response = requests.get(url, headers=headers).text
         counts = []
-        for i, option in zip(['A', 'B', 'C', 'D'], self.options.split(' ')):
+        for i, option in zip(['A', 'B', 'C', 'D'], self.options):
             count = response.count(option)
             counts.append((count, i))
             logger.info(f'{i}. {option}: {count}')
@@ -144,10 +144,10 @@ class ChallengeQuiz(object):
         self.pos = self._pos()
         bank = self.db.query(content=self.content, catagory='挑战题')
         if bank is not None:
-            options = "\n".join([f'{chr(i+65)}. {x}' for i, x in enumerate(self.options.split(' '))])
+            options = "\n".join([f'{chr(i+65)}. {x}' for i, x in enumerate(self.options)])
             print(f'\n[挑战题] {self.content[:45]}...\n{options}')
             self.has_bank = True
-            logger.debug('bank from database')
+            # logger.debug('bank from database')
             cursor = ord(bank.answer) - 65
             logger.info(f'自动提交答案 {bank.answer}')
             sleep(delay_seconds) # 延时按钮
@@ -193,7 +193,7 @@ class ChallengeQuiz(object):
             else:
                 temp = Bank.from_challenge(content=self.content, options=self.options, answer='', note=self.answer, bounds='')
                 self.json_blank.append(temp.to_dict())
-            logger.debug(f'错题加入错题集JSON文件中')
+                logger.debug(f'错题加入错题集JSON文件中')
             logger.info(f'不要那么贪心，闪动的复活按钮不好点击，就此结束吧')
             return False
         
@@ -258,6 +258,7 @@ class ChallengeQuiz(object):
 
     def run(self, count):
         while True:
+            self.json_blank = self._load()
             if 0 == self._run(count):
                 logger.info(f'已达成目标题数 {count} 题，退出挑战')
                 break
@@ -288,6 +289,8 @@ if __name__ == "__main__":
     xm = xmler.Xmler(path)
     cg = ChallengeQuiz('mumu', ad, xm)
     cg.runonce(args.count)
+
+    ad.close()
 
 
 

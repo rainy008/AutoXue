@@ -65,12 +65,12 @@ class App(object):
         if vdo:
             with timer.Timer() as t:
                 self._vdo_run()
-            logger.info(f'观影耗时 {round(t.elapsed, 2)} 秒')
+            logger.info(f'视听学习耗时 {round(t.elapsed, 2)} 秒')
         
         if art:
             with timer.Timer() as t:
                 self._art_run()
-            logger.info(f'阅读耗时 {round(t.elapsed, 2)} 秒')
+            logger.info(f'文章阅读耗时 {round(t.elapsed, 2)} 秒')
         
 
     def __del__(self):

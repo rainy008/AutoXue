@@ -14,15 +14,15 @@ from .. import logger
 from ..model import Bank
 
 class Xlser(object):
-    def __init__(self, filename):
-        self.filename = filename
+    def __init__(self, path):
+        self.path = path
         
 
     
     def load(self):  
         data = []      
         app=xw.App(visible=False,add_book=False)
-        wb = app.books.open(self.filename)
+        wb = app.books.open(self.path)
         ws = wb.sheets['bank']
         rng = ws.used_range
         logger.debug(rng.rows[0].value)
@@ -47,7 +47,7 @@ class Xlser(object):
         except Exception:
             logger.debug(f'xls写入失败')
         finally:
-            wb.save(self.filename)
+            wb.save(self.path)
             wb.close()
             app.quit()
         return 0

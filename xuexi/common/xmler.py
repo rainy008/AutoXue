@@ -60,10 +60,8 @@ class Xmler(object):
         logger.debug(res)
         return res
 
-    def options(self, rule:str)->str:
-        res = [re.sub(r'\s+', '、', x) for x in self.root.xpath(rule)]
-        logger.debug(res)
-        res = ' '.join(res)
+    def options(self, rule:str)->list:
+        res = [re.sub(r'\|', '_', x) for x in self.root.xpath(rule)]
         logger.debug(res)
         return res
 
@@ -90,8 +88,11 @@ if __name__ == "__main__":
     path = Path(args.filename)
     xm = Xmler(path)
     xm.load()
-    cols = xm.xpath('//node[@class="android.widget.LinearLayout"]/node[@class="android.widget.LinearLayout"]/node[@class="android.view.ViewGroup"]/node[@class="android.widget.LinearLayout"]')
-    for c in cols:
-        print(c.xpath('./node/@text'))
-        print(c.xpath('./@bounds'))
-    print(c.str2complex('[488,87][521,144]'))
+    txt_pic = r'//node[@resource-id="cn.xuexi.android:id/general_card_title_id"]/@text'
+    txt_3pic = r'//node[@class="android.widget.ListView"]/node/node[@class="android.widget.LinearLayout" and @index="0"]/node[@class="android.widget.TextView"]/@text'
+    txt = r'//node[@class="android.widget.ListView"]/node/node[@class="android.widget.LinearLayout" and @index="0"]/node[@class="android.widget.LinearLayout"]/node[1]/@text'
+    for rule in [txt, txt_pic]:
+        print(rule)
+        items = xm.texts(rule)
+        for item in items:
+            print(item)

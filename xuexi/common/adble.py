@@ -23,20 +23,24 @@ class Adble(object):
         self.host = host
         self.port = port
         if self.is_virtual:
-            self._connect()            
-        else:            
+            self._connect()          
+        else:
             logger.info(f'请确保安卓手机连接手机并打开USB调试!')
-        self.ime = self._getIME()
-        self.wmsize = self._size()
-        self._setIME('com.android.adbkeyboard/.AdbIME')
+        self.device = self._getDevice()
+        if self.device is not None:
+            logger.info(f'当前设备 {self.device}')
+            self.ime = self._getIME()
+            self.wmsize = self._size()
+            self._setIME('com.android.adbkeyboard/.AdbIME')
+        else:
+            logger.debug(f'未连接设备')
+            raise RuntimeError(f'未连接任何设备')
 
     def _connect(self):
         '''连接模拟器adb connect host:port'''
         logger.debug(f'正在连接模拟器{self.host}:{self.port}')
-        if 0 == subprocess.check_call(f'adb connect {self.host}:{self.port}', shell=True, stdout=subprocess.PIPE):
-            logger.info(f'连接模拟器{self.host}:{self.port} 成功')
-        else:
-            logger.info(f'断开模拟器{self.host}:{self.port} 失败')
+        subprocess.check_call(f'adb connect {self.host}:{self.port}', shell=True, stdout=subprocess.PIPE)
+
         
     def _disconnect(self):
         '''连接模拟器adb connect host:port'''
@@ -64,7 +68,7 @@ class Adble(object):
         return 0
     
     def _size(self):
-        res = subprocess.check_output('adb shell wm size', shell=False)
+        res = subprocess.check_output(f'adb -s {self.device} shell wm size', shell=False)
         if isinstance(res, bytes):
             wmsize = re.findall(r'\d+', str(res, 'utf-8'))
         else:
@@ -77,14 +81,14 @@ class Adble(object):
     def _setIME(self, ime):
         logger.debug(f'设置输入法 {ime}')
         logger.debug(f'正在设置输入法 {ime}')
-        if 0 == subprocess.check_call(f'adb shell ime set {ime}', shell=True, stdout=subprocess.PIPE):
+        if 0 == subprocess.check_call(f'adb -s {self.device} shell ime set {ime}', shell=True, stdout=subprocess.PIPE):
             logger.debug(f'设置输入法 {ime} 成功')
         else:
             logger.debug(f'设置输入法 {ime} 失败')
 
     def _getIME(self)->list:
         logger.debug(f'获取系统输入法list')
-        res = subprocess.check_output(f'adb shell ime list -s', shell=False)
+        res = subprocess.check_output(f'adb -s {self.device} shell ime list -s', shell=False)
         if isinstance(res, bytes):
             # ime = re.findall(r'\d+', str(res, 'utf-8'))
             ime = re.findall(r'\S+', str(res, 'utf-8'))
@@ -92,6 +96,21 @@ class Adble(object):
             ime = re.findall('\S+', res)
         logger.debug(f'系统输入法：{ime}')
         return ime[0]
+
+    def _getDevice(self)->str:
+        logger.debug(f'获取连接的设备信息')
+        res = subprocess.check_output(f'adb devices')
+        if isinstance(res, bytes):
+            res = str(res, 'utf-8')
+        devices = re.findall(r'(.*)\tdevice', res)
+        logger.debug(f'已连接设备 {devices}')
+        if self.is_virtual and f'{self.host}:{self.port}' in devices:
+            return f'{self.host}:{self.port}'
+        elif 0 == len(devices):
+            return None
+        else:
+            return devices[0]
+
         
 
     def uiautomator(self, path=None, filesize=10240):
@@ -102,9 +121,9 @@ class Adble(object):
                 path.unlink()
             else:
                 logger.debug('文件不存在,无需删除')
-            subprocess.check_call(f'adb shell uiautomator dump /sdcard/ui.xml', shell=True, stdout=subprocess.PIPE)
+            subprocess.check_call(f'adb -s {self.device} shell uiautomator dump /sdcard/ui.xml', shell=True, stdout=subprocess.PIPE)
             # sleep(1)
-            subprocess.check_call(f'adb pull /sdcard/ui.xml {path}', shell=True, stdout=subprocess.PIPE)
+            subprocess.check_call(f'adb -s {self.device} pull /sdcard/ui.xml {path}', shell=True, stdout=subprocess.PIPE)
             if filesize < path.stat().st_size:
                 break
             else:
@@ -113,15 +132,15 @@ class Adble(object):
     def screenshot(self, path=None):
         if not path:
             path = self.path
-        subprocess.check_call(f'adb shell screencap -p /sdcard/ui.png', shell=True, stdout=subprocess.PIPE)
+        subprocess.check_call(f'adb -s {self.device} shell screencap -p /sdcard/ui.png', shell=True, stdout=subprocess.PIPE)
         # sleep(1)
-        subprocess.check_call(f'adb pull /sdcard/ui.png {path}', shell=True, stdout=subprocess.PIPE)
+        subprocess.check_call(f'adb -s {self.device} pull /sdcard/ui.png {path}', shell=True, stdout=subprocess.PIPE)
 
     def swipe(self, sx, sy, dx, dy, duration):
         ''' swipe from (sx, xy) to (dx, dy) in duration ms'''
         # adb shell input swipe 500 500 500 200 500
         logger.debug(f'滑动操作 ({sx}, {sy}) --{duration}ms-> ({dx}, {dy})')
-        res = subprocess.check_call(f'adb shell input swipe {sx} {sy} {dx} {dy} {duration}', shell=True, stdout=subprocess.PIPE)
+        res = subprocess.check_call(f'adb -s {self.device} shell input swipe {sx} {sy} {dx} {dy} {duration}', shell=True, stdout=subprocess.PIPE)
         # sleep(1)
         return res
 
@@ -130,7 +149,7 @@ class Adble(object):
         logger.debug(f'滑动操作 {begin} --{duration}ms-> {end}')
         sx, sy = int(begin.real), int(begin.imag)
         dx, dy = int(end.real), int(end.imag)
-        res = subprocess.check_call(f'adb shell input swipe {sx} {sy} {dx} {dy} {duration}', shell=True, stdout=subprocess.PIPE)
+        res = subprocess.check_call(f'adb -s {self.device} shell input swipe {sx} {sy} {dx} {dy} {duration}', shell=True, stdout=subprocess.PIPE)
         # sleep(1)
         return res
 
@@ -144,20 +163,23 @@ class Adble(object):
             else:
                 logger.debug(f'输入坐标有误')
         else:
-            dx, dy = int(x.real), int(x.imag)
+            try:
+                dx, dy = int(x.real), int(x.imag)
+            except Exception as e:
+                raise AttributeError(f'{x} 不是可点击的坐标')
         logger.debug(f'触摸操作 ({dx}, {dy})')
         return self.swipe(dx, dy, dx, dy, duration)
 
     def back(self):
         # adb shell input keyevent 4 
         logger.debug(f'adb 触发<返回按钮>事件')
-        subprocess.check_call(f'adb shell input keyevent 4', shell=True, stdout=subprocess.PIPE)
+        subprocess.check_call(f'adb -s {self.device} shell input keyevent 4', shell=True, stdout=subprocess.PIPE)
 
 
     def input(self, msg):
         logger.debug(f'输入文本 {msg}')
         # subprocess.check_call(f'adb shell input text {msg}', shell=True, stdout=subprocess.PIPE)
-        subprocess.check_call(f'adb shell am broadcast -a ADB_INPUT_TEXT --es msg {msg}', shell=True, stdout=subprocess.PIPE)
+        subprocess.check_call(f'adb -s {self.device} shell am broadcast -a ADB_INPUT_TEXT --es msg {msg}', shell=True, stdout=subprocess.PIPE)
 
     def close(self):
         self._setIME(self.ime)
@@ -170,7 +192,7 @@ if __name__ == "__main__":
     parse = ArgumentParser()
     parse.add_argument(dest='filename', metavar='filename', nargs="?", type=str, help='目标文件路径')
     parse.add_argument('-s', '--screenshot', metavar='screenshot', nargs='?', const=True, type=bool, default=False, help='截图并上传')
-    parse.add_argument('-t', '--text', metavar='text', type=str, default='不忘初心牢记使命', help='输入文字')
+    parse.add_argument('-t', '--text', metavar='text', type=str, default='adb input text test', help='输入文字')
     parse.add_argument('-u', '--uiautomator', metavar='uiautomator', nargs='?', const=True, type=bool, default=False, help='解析布局xml并上传')
     parse.add_argument('-v', '--virtual', metavar='virtual', nargs='?', const=True, type=bool, default=False, help='是否模拟器')
     args = parse.parse_args()
@@ -185,7 +207,8 @@ if __name__ == "__main__":
             adb.uiautomator(path.with_suffix('.xml'))
             print(f'布局保存成功')
     else:
-        adb.text(args.text)
+        # print(type(adb.device), adb.device)
+        adb.input(args.text)
         print(f'输入文字{args.text}')
 
     adb.close()
